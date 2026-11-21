@@ -44,7 +44,7 @@ Bağımlılık kurulu. Başka bilgisayarda önce KUR.cmd, isteğe bağlı canlı
 
 TikTokLive 7.0.1 üçüncü taraf kütüphanedir. Gerçek hesapta uçtan uca bağlantı henüz denenmedi. TikTok değişiklikleri, erişim/imza servisleri veya bölgesel kısıtlar bağlantıyı etkileyebilir. Yerel demo internet gerektirmez; canlı bağlantı internet gerektirir. Kaynak durumu TikTok bağlı demeden yalnızca yerel sunucunun bağlı olması yeterli değildir. Hatalar runtime/tiktok.log içindedir. Dinleyici kapanırsa hazırlık ekranındaki durum güncellenir.
 
-Hediye serilerinde ara mesajlar atlanır, son repeat_count toplamı sayılır. order_id varsa tekrar teslimat önlenir; son 4000 kimlik bellekte tutulur. Dinleyici kuyruğu 1000 olayla sınırlı; gönderilemeyen olaylar loga yazılır, diske kaydedilip yeniden oynatılmaz. Oyun puanları gerçek para/ödül muhasebesi değildir. Avatar fotoğrafı aktarma dinleyicide etkin değil; baş harfler gösterilir.
+Hediye serilerinde ara mesajlar atlanır, son repeat_count toplamı sayılır. order_id varsa tekrar teslimat önlenir; son 4000 kimlik bellekte tutulur. Dinleyici kuyruğu 1000 olayla sınırlı; gönderilemeyen olaylar loga yazılır, diske kaydedilip yeniden oynatılmaz. Oyun puanları gerçek para/ödül muhasebesi değildir. Dinleyici TikTok profil fotoğrafını (HTTPS) aktarır; fotoğraf gelmezse baş harfler gösterilir.
 
 Kaynaklar:
 - https://github.com/isaackogan/TikTokLive
@@ -64,7 +64,7 @@ OBS kaynakları: https://obsproject.com/kb/browser-source ve https://obsproject.
 
 ## Görseller ve genişletme
 
-Karakterler prosedürel 3B; geleneksel kıyafet işlemeleri, halay başının mendili, davul, halı, minder, fener, taş meydan, sıcak/soğuk ışık ve gölgeler var. Ortak el hedefleri ve eşzamanlı adımlar zinciri korur. Stilize modellerdir; referans videodaki özgün varlıkların kopyası değildir.
+Karakterler prosedürel 3B; ince-uzun oranlar, yere kadar uzun elbiseler, uzun saç, sikke alınlık, loş fener ışığı, geleneksel kıyafet işlemeleri, halay başının mendili, davul, halı, minder, fener, taş meydan, sıcak/soğuk ışık ve gölgeler var. Ortak el hedefleri ve eşzamanlı adımlar zinciri korur. Stilize modellerdir; referans videodaki özgün varlıkların kopyası değildir.
 
 Çalışan iki halay hareket modülü vardır. Cenaze gibi başka temalı karakter/sahne modülleri henüz eklenmedi. Yeni profil kaydetmek yeni karakter modeli üretmez. Yeni animasyonlar aynı olay ve profil yapısına kod/varlık eklenerek genişletilebilir.
 

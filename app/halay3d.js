@@ -21,51 +21,81 @@ function fabric(color){
  for(let y=15;y<256;y+=32)for(const x of [27,229]){ctx.strokeStyle='#e6c884';ctx.beginPath();ctx.moveTo(x,y-6);ctx.lineTo(x+5,y);ctx.lineTo(x,y+6);ctx.lineTo(x-5,y);ctx.closePath();ctx.stroke()}
  const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;const material=new T.MeshStandardMaterial({map:tex,roughness:.95});materials.set(key,material);return material;
 }
+function dressSkirt(){
+ // Belden yere kadar inen, kıvrımlı uzun etek.
+ return geo('longskirt',()=>{const points=[];for(let i=0;i<=12;i++){const q=i/12;points.push(new T.Vector2(.125+Math.pow(q,1.35)*.21,1.05-q*1.03))}const g=new T.LatheGeometry(points,56);const pos=g.attributes.position;for(let i=0;i<pos.count;i++){const y=pos.getY(i),a=Math.atan2(pos.getX(i),pos.getZ(i)),depth=(1.05-y)/1.03,fold=1+Math.sin(a*14)*.06*depth+Math.sin(a*5+1)*.02*depth;pos.setX(i,pos.getX(i)*fold);pos.setZ(i,pos.getZ(i)*fold)}g.computeVertexNormals();return g});
+}
+function dressFabric(color){
+ const key='dress:'+color;if(materials.has(key))return materials.get(key);
+ const cn=document.createElement('canvas');cn.width=cn.height=256;const ctx=cn.getContext('2d');
+ ctx.fillStyle=color;ctx.fillRect(0,0,256,256);
+ // Yumuşak kumaş dokusu ve önde ince işleme şeridi.
+ for(let x=0;x<256;x++){const shade=Math.sin(x/256*Math.PI*28)*.5+.5;ctx.fillStyle=`rgba(0,0,0,${.05+shade*.12})`;ctx.fillRect(x,0,1,256)}
+ for(let y=0;y<256;y+=3){ctx.fillStyle=y%6?'#ffffff05':'#00000008';ctx.fillRect(0,y,256,1)}
+ ctx.strokeStyle='#c9a55a99';ctx.lineWidth=2;for(const x of [120,136]){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,256);ctx.stroke()}
+ for(let y=10;y<256;y+=22){ctx.fillStyle='#d8b867aa';ctx.beginPath();ctx.moveTo(128,y-5);ctx.lineTo(132,y);ctx.lineTo(128,y+5);ctx.lineTo(124,y);ctx.fill()}
+ const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;const material=new T.MeshStandardMaterial({map:tex,roughness:.92,metalness:.02});materials.set(key,material);return material;
+}
 function makeActor(user){
  const root=new T.Group(),body=new T.Group();root.add(body);
- const hash=[...user.id].reduce((a,ch)=>a+ch.charCodeAt(0),0),skin=mat(['#c69a77','#d7af8c','#b78564','#e0b99a'][hash%4]),cloth=fabric(user.color||'#6d2333'),cream=mat('#d8c49e'),gold=mat('#b79040',.45,.3),dark=mat('#18171a'),hair=mat(['#211814','#3c251b','#171518'][hash%3]);
- const female=user.costume!=='erkek',shirt=mat(female?'#a98661':'#cfb998');
- // Rounded torso and fitted folk waistcoat, with metallic belt and embroidery.
- mesh(geo('torso',()=>new T.CylinderGeometry(.21,.16,.48,20)),shirt,body,0,1.20,0,1,1,.66);
- ell(body,shirt,0,1.42,0,.225,.10,.135);
- if(female){mesh(pleatedSkirt(),cloth,body,0,0,0);mesh(geo('hem',()=>new T.CylinderGeometry(.328,.338,.025,48)),gold,body,0,.185,0);block(body,cloth,-.105,1.25,.104,.14,.39,.045);block(body,cloth,.105,1.25,.104,.14,.39,.045)}
- else {mesh(geo('hips',()=>new T.SphereGeometry(1,16,10)),cloth,body,0,.92,0,.21,.20,.13);block(body,cloth,-.12,1.24,.11,.15,.41,.055);block(body,cloth,.12,1.24,.11,.15,.41,.055)}
- mesh(geo('belt',()=>new T.CylinderGeometry(.181,.184,.065,24)),gold,body,0,.99,0,1,1,.78);
- for(let i=0;i<6;i++){ell(body,gold,-.055,1.08+i*.055,.145,.009,.013,.006);ell(body,gold,.055,1.08+i*.055,.145,.009,.013,.006)}
- // Neck, head and facial detail remain visible beneath the floating profile ring.
- ell(body,skin,0,1.51,0,.064,.085,.061);ell(body,skin,0,1.67,0,.104,.142,.096);
- ell(body,skin,-.105,1.67,0,.025,.042,.02);ell(body,skin,.105,1.67,0,.025,.042,.02);
- ell(body,hair,0,1.74,-.018,.109,.088,.091);
- ell(body,skin,0,1.656,.098,.024,.034,.035);
- for(const x of [-.039,.039]){ell(body,mat('#f1e7d9'),x,1.694,.085,.022,.012,.012);ell(body,dark,x,1.694,.096,.008,.009,.005)}
- ell(body,mat('#8a5547'),0,1.61,.085,.028,.007,.008);
+ const hash=[...user.id].reduce((a,ch)=>a+ch.charCodeAt(0),0),skin=mat(['#c99b78','#d9b08e','#b88763','#e2bc9c'][hash%4],.6),cloth=dressFabric(user.color||'#6d2333'),plain=mat(user.color||'#6d2333',.9),gold=mat('#b89244',.4,.45),dark=mat('#141216',.7),hair=mat(['#1d1411','#33201a','#141215','#4a2c1d'][hash%4],.55);
+ const female=user.costume!=='erkek';
+ // Gövde: ince bel, dar omuz; boy yaklaşık 1.75.
  if(female){
-   mesh(geo('cap',()=>new T.SphereGeometry(.115,20,12,0,Math.PI*2,0,Math.PI*.53)),cloth,body,0,1.72,-.006);
-   mesh(geo('headband',()=>new T.TorusGeometry(.108,.012,6,32)),gold,body,0,1.741,-.006).rotation.x=Math.PI/2;
-   const veil=mesh(geo('veil',()=>new T.CylinderGeometry(.085,.145,.37,18,1,true,0,Math.PI)),cream,body,0,1.54,-.06);veil.rotation.y=Math.PI/2;
-   ell(body,gold,-.105,1.615,.01,.014,.026,.012);ell(body,gold,.105,1.615,.01,.014,.026,.012);
- }else{mesh(geo('hat',()=>new T.CylinderGeometry(.111,.113,.09,20)),cloth,body,0,1.805,-.005);mesh(geo('hatband',()=>new T.CylinderGeometry(.115,.115,.019,20)),dark,body,0,1.77,-.005)}
+  mesh(geo('bodice',()=>new T.CylinderGeometry(.16,.125,.4,24)),cloth,body,0,1.22,0,1,1,.72);
+  ell(body,plain,0,1.41,0,.175,.07,.11);
+  mesh(dressSkirt(),cloth,body,0,0,0);
+  mesh(geo('hemband',()=>new T.CylinderGeometry(.342,.35,.035,56,1,true)),mat('#8f6d32',.5,.4),body,0,.05,0);
+  mesh(geo('belt2',()=>new T.CylinderGeometry(.128,.128,.05,24)),gold,body,0,1.04,0,1,1,.74);
+  for(let i=0;i<5;i++)ell(body,gold,0,1.12+i*.055,.092,.012,.016,.006);
+ }else{
+  const shirt=mat('#e6dccb',.85),trousers=mat('#1d1b22',.9);
+  mesh(geo('shirt',()=>new T.CylinderGeometry(.165,.14,.42,24)),shirt,body,0,1.2,0,1,1,.72);
+  ell(body,shirt,0,1.4,0,.18,.07,.115);
+  block(body,cloth,-.085,1.21,.06,.12,.4,.05);block(body,cloth,.085,1.21,.06,.12,.4,.05);
+  mesh(geo('hips2',()=>new T.CylinderGeometry(.14,.135,.16,20)),trousers,body,0,.95,0,1,1,.75);
+  mesh(geo('belt2m',()=>new T.CylinderGeometry(.142,.142,.06,24)),mat('#7d1d28',.8),body,0,1.02,0,1,1,.76);
+ }
+ // Boyun ve oranlı baş; küçük yüz ayrıntıları.
+ ell(body,skin,0,1.48,0,.045,.06,.045);
+ ell(body,skin,0,1.6,0,.078,.1,.085);
+ ell(body,skin,0,1.575,.075,.013,.02,.016);
+ for(const x of [-.028,.028])ell(body,dark,x,1.615,.072,.009,.006,.004);
+ for(const x of [-.03,.03])ell(body,hair,x,1.637,.074,.016,.003,.004);
+ ell(body,mat('#8c4f45',.6),0,1.548,.072,.02,.005,.005);
+ if(female){
+  ell(body,hair,0,1.645,-.012,.084,.078,.088);
+  ell(body,hair,0,1.5,-.06,.085,.17,.05);
+  mesh(geo('coinband',()=>new T.TorusGeometry(.083,.008,6,32)),gold,body,0,1.655,.004).rotation.x=Math.PI/2.15;
+  for(let i=-3;i<=3;i++)ell(body,gold,Math.sin(i*.28)*.083,1.64,Math.cos(i*.28)*.083,.009,.012,.004);
+ }else{
+  ell(body,hair,0,1.65,-.01,.08,.06,.085);
+  mesh(geo('kalpak',()=>new T.CylinderGeometry(.075,.085,.085,20)),dark,body,0,1.71,-.005);
+  ell(body,hair,0,1.555,.07,.045,.012,.012);
+ }
  const legs=[];for(const side of [-1,1]){
-  const upper=bone(body,female?skin:cloth,female?.053:.08),lower=bone(body,female?skin:cloth,.052),shoe=ell(body,dark,side*.11,.065,.065,.073,.058,.147);
+  const upper=bone(body,female?dark:mat('#1d1b22',.9),female?.045:.06),lower=bone(body,female?dark:mat('#1d1b22',.9),.045),shoe=ell(body,dark,side*.11,.065,.065,.06,.05,.13);
   legs.push({side,upper,lower,shoe});
  }
+ const sleeve=female?cloth:mat('#e6dccb',.85),cuff=female?gold:sleeve;
  const arms=[];for(const side of [-1,1]){
-  const upper=bone(body,cream,.063),lower=bone(body,skin,.047),elbow=ell(body,cream,0,0,0,.064,.064,.064),hand=ell(body,skin,0,0,0,.055,.046,.04);
-  arms.push({side,upper,lower,elbow,hand});
+  const upper=bone(body,sleeve,.05),lower=bone(body,sleeve,.043),elbow=ell(body,sleeve,0,0,0,.05,.05,.05),hand=ell(body,skin,0,0,0,.04,.045,.03);
+  ell(body,plain,side*.165,1.39,0,.065,.06,.065);
+  arms.push({side,upper,lower,elbow,hand,cuff:cuff===gold?mesh(geo('cuff',()=>new T.CylinderGeometry(.046,.046,.03,12)),gold,body,0,0,0):null});
  }
  let drum=null;
  if(user.role==='drummer'){
-  drum=new T.Group();body.add(drum);drum.position.set(0,.88,.34);drum.rotation.x=Math.PI*.09;
-  mesh(geo('drum',()=>new T.CylinderGeometry(.27,.27,.31,32)),cloth,drum,0,0,0);
-  for(const h of [-.16,.16])mesh(geo('drumskin',()=>new T.CylinderGeometry(.285,.285,.025,32)),cream,drum,0,h,0);
+  drum=new T.Group();body.add(drum);drum.position.set(0,.88,.32);drum.rotation.x=Math.PI*.09;
+  mesh(geo('drum',()=>new T.CylinderGeometry(.27,.27,.31,32)),mat('#5a1820',.8),drum,0,0,0);
+  for(const h of [-.16,.16])mesh(geo('drumskin',()=>new T.CylinderGeometry(.285,.285,.025,32)),mat('#d8c49e'),drum,0,h,0);
   for(let a=0;a<Math.PI*2;a+=Math.PI/6){const cord=bone(drum,gold,.008);segment(cord,v(Math.cos(a)*.277,-.15,Math.sin(a)*.277),v(Math.cos(a+.26)*.277,.15,Math.sin(a+.26)*.277))}
  }
  let zurna=null;
  if(user.role==='zurnaci'){
   // Zurna: ağızdan öne-aşağı uzanan, ucu genişleyen nefesli çalgı.
-  zurna={mouth:v(0,1.62,.12),bell:v(0,1.24,.5)};
-  const pipe=mesh(geo('zurna',()=>new T.CylinderGeometry(.016,.05,1,14)),mat('#7a4a25',.55),body,0,0,0);segment(pipe,zurna.bell,zurna.mouth);
-  const lip=mesh(geo('zurnalip',()=>new T.TorusGeometry(.052,.01,6,20)),gold,body,0,0,0);lip.position.copy(zurna.bell);lip.quaternion.copy(pipe.quaternion);lip.rotateX(Math.PI/2);
+  zurna={mouth:v(0,1.55,.09),bell:v(0,1.2,.46)};
+  const pipe=mesh(geo('zurna',()=>new T.CylinderGeometry(.014,.048,1,14)),mat('#7a4a25',.55),body,0,0,0);segment(pipe,zurna.bell,zurna.mouth);
+  const lip=mesh(geo('zurnalip',()=>new T.TorusGeometry(.05,.009,6,20)),gold,body,0,0,0);lip.position.copy(zurna.bell);lip.quaternion.copy(pipe.quaternion);lip.rotateX(Math.PI/2);
  }
  const flag=new T.Mesh(new T.PlaneGeometry(.22,.28,6,8),new T.MeshStandardMaterial({color:'#b82536',roughness:1,side:T.DoubleSide}));flag.visible=false;body.add(flag);
  return {root,body,user,legs,arms,drum,zurna,flag,phase:hash*.001};
@@ -79,13 +109,14 @@ function updateLegs(a,time,beat,scale){
 }
 function solveArm(a,arm,target,time,bpm){
  // The target is shared by adjacent dancers: the two wrist endpoints are identical.
- const shoulder=v(arm.side*.205,1.41,0),hand=a.body.worldToLocal(target.clone());
- const mid=shoulder.clone().lerp(hand,.5),distance=shoulder.distanceTo(hand),length=.32;
+ const shoulder=v(arm.side*.17,1.38,0),hand=a.body.worldToLocal(target.clone());
+ const mid=shoulder.clone().lerp(hand,.5),distance=shoulder.distanceTo(hand),length=.3;
  const bend=Math.sqrt(Math.max(.001,length*length-distance*distance*.25));
- mid.y-=bend;mid.z+=.045;
+ mid.y-=bend*.8;mid.x+=arm.side*bend*.45;mid.z-=.02;
  segment(arm.upper,shoulder,mid);segment(arm.lower,mid,hand);arm.elbow.position.copy(mid);arm.hand.position.copy(hand);
+ if(arm.cuff){arm.cuff.position.copy(mid).lerp(hand,.86);arm.cuff.quaternion.copy(arm.lower.quaternion)}
 }
-function floorTexture(){const cn=document.createElement('canvas');cn.width=cn.height=1024;const ctx=cn.getContext('2d');ctx.fillStyle='#715844';ctx.fillRect(0,0,1024,1024);for(let row=0;row<8;row++)for(let col=-1;col<8;col++){let x=col*150+(row%2)*75,y=row*130;ctx.fillStyle=`hsl(28 22% ${33+((row*71+col*13)%9)}%)`;ctx.fillRect(x+2,y+2,146,126);ctx.strokeStyle='#503d30';ctx.strokeRect(x,y,150,130);for(let i=0;i<80;i++){ctx.fillStyle=i%2?'#ffffff08':'#0000000c';ctx.fillRect(x+(i*37)%148,y+(i*53)%127,2,1)}}const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.repeat.set(3,3);return tex}
+function floorTexture(){const cn=document.createElement('canvas');cn.width=cn.height=1024;const ctx=cn.getContext('2d');ctx.fillStyle='#4a392e';ctx.fillRect(0,0,1024,1024);for(let row=0;row<8;row++)for(let col=-1;col<8;col++){let x=col*150+(row%2)*75,y=row*130;ctx.fillStyle=`hsl(26 20% ${25+((row*71+col*13)%7)}%)`;ctx.fillRect(x+2,y+2,146,126);ctx.strokeStyle='#503d30';ctx.strokeRect(x,y,150,130);for(let i=0;i<80;i++){ctx.fillStyle=i%2?'#ffffff08':'#0000000c';ctx.fillRect(x+(i*37)%148,y+(i*53)%127,2,1)}}const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.repeat.set(3,3);return tex}
 function rugTexture(){const cn=document.createElement('canvas');cn.width=cn.height=512;const ctx=cn.getContext('2d');ctx.fillStyle='#6d1527';ctx.fillRect(0,0,512,512);for(let i=0;i<12;i++){ctx.strokeStyle=i%2?'#c49b50':'#291c2c';ctx.lineWidth=3;ctx.strokeRect(8+i*3,8+i*3,496-i*6,496-i*6)}for(let x=85;x<500;x+=85)for(let y=85;y<500;y+=85){ctx.fillStyle=(x+y)%2?'#c6a05f':'#e5c78d';ctx.beginPath();ctx.moveTo(x,y-22);ctx.lineTo(x+22,y);ctx.lineTo(x,y+22);ctx.lineTo(x-22,y);ctx.fill();ctx.fillStyle='#1b2232';ctx.fillRect(x-5,y-5,10,10)}const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;return tex}
 function roundRugTexture(){
  // Yuvarlak kilim: lacivert kenar şeridi, altın motifler ve ortada üç halka.
@@ -104,7 +135,9 @@ export function createHalayStage(canvas,{transparent=false}={}){
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
  const scene=new T.Scene();if(!transparent){scene.background=new T.Color('#13101a');scene.fog=new T.Fog('#13101a',17,38)}
  const camera=new T.PerspectiveCamera(49,540/960,.1,80);camera.position.set(0,7.9,12.7);camera.lookAt(0,.25,0);
- scene.add(new T.HemisphereLight('#e4d5be','#4d3029',2));
+ const hemi=new T.HemisphereLight('#e4d5be','#4d3029',2);scene.add(hemi);
+ // Fenerlerden gelen sıcak ışık halkayı loş bir gece meydanı gibi aydınlatır.
+ const warm=[];for(const [x,z] of [[-4,-2],[4,-2],[0,3]]){const l=new T.PointLight('#ffb466',0,16,1.6);l.position.set(x,3.2,z);scene.add(l);warm.push(l)}
  const key=new T.DirectionalLight('#ffe1ae',3.1);key.position.set(-3,8,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:.5,far:30});key.shadow.normalBias=.025;key.shadow.bias=-.0003;scene.add(key);scene.add(key.target);
  const rim=new T.DirectionalLight('#b8c3ee',1.5);rim.position.set(3,4,-6);scene.add(rim);
  const decor=new T.Group();scene.add(decor);decor.visible=!transparent;
@@ -134,8 +167,8 @@ export function createHalayStage(canvas,{transparent=false}={}){
  function applyLook(options){
   const theme=options.theme||'night',quality=options.quality||'balanced',signature=theme+quality;if(signature===lastLook)return;lastLook=signature;
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality==='high'?2:1.25));key.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null}
-  renderer.toneMappingExposure=theme==='sunset'?1.05:.83;
-  key.color.set(theme==='sunset'?'#ffce91':'#ffe3b5');key.intensity=theme==='sunset'?2.8:2.0;rim.color.set(theme==='sunset'?'#ffc889':'#839ad1');rim.intensity=theme==='sunset'?.7:1.2;
+  renderer.toneMappingExposure=theme==='sunset'?1.0:.78;hemi.intensity=theme==='sunset'?1.8:.85;for(const l of warm)l.intensity=theme==='sunset'?6:16;
+  key.color.set(theme==='sunset'?'#ffce91':'#ffe3b5');key.intensity=theme==='sunset'?2.6:1.35;rim.color.set(theme==='sunset'?'#ffc889':'#839ad1');rim.intensity=theme==='sunset'?.7:1.2;
   if(!transparent){scene.background.set(theme==='sunset'?'#554039':'#10121e');scene.fog.color.copy(scene.background)}
  }
  const project=p=>{const q=p.clone().project(camera);return {x:(q.x*.5+.5)*540,y:(-.5*q.y+.5)*960}};
@@ -165,6 +198,7 @@ export function createHalayStage(canvas,{transparent=false}={}){
    bench.position.set(.1,0,R*.12);bench.rotation.y=-.42;
    zurnaSpot=v(-R*.46,0,R*.3);drumSpot=v(R*.3,0,R*.5);
    backdrop.position.z=-R-1.6+5.3;
+   warm[0].position.set(-R*.95,3.4,-R*.35);warm[1].position.set(R*.95,3.4,-R*.35);warm[2].position.set(0,3.2,R*.45);
    camPos=v(0,4.4+R*1.15,R+3.3);camLook=v(0,0,-R*.42);
   }else{
    const span=Math.max(.65,Math.min(6.3,(n-1)*.65));

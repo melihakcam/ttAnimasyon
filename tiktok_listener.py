@@ -5,12 +5,20 @@ from urllib.error import URLError
 
 log=logging.getLogger('tiktok-bridge')
 
+def avatar_url(user):
+    # TikTokLive sürümüne göre profil resmi farklı alanlarda gelir; ilk HTTPS adresini al.
+    image=getattr(user,'avatar_thumb',None) or getattr(user,'avatar',None)
+    for name in ('m_urls','url_list','urls'):
+        for url in (getattr(image,name,None) or []):
+            if isinstance(url,str) and url.startswith('https://') and len(url)<=1000: return url
+    return ''
+
 def gift_payload(event):
     gift=event.gift
     if gift is None or event.user is None or (gift.streakable and event.streaking): return None
     u=event.user
     payload=dict(type='gift',user_id=str(u.unique_id or u.id),name=str(u.nickname or u.unique_id or 'Misafir')[:40],
-                 gift=str(gift.name),gift_id=int(gift.id),count=max(1,int(event.repeat_count or 1)))
+                 gift=str(gift.name),gift_id=int(gift.id),count=max(1,int(event.repeat_count or 1)),avatar=avatar_url(u))
     # order_id identifies a delivery; don't guess an ID from user/gift/count (separate gifts may match).
     oid=getattr(event,'order_id',None)
     if oid: payload['event_id']='tiktok-gift:'+str(oid)
@@ -46,7 +54,7 @@ async def main(username):
     def user_fields(event):
         u=event.user
         if u is None: return None
-        return dict(user_id=str(u.unique_id or u.id),name=str(u.nickname or u.unique_id or 'Misafir')[:40])
+        return dict(user_id=str(u.unique_id or u.id),name=str(u.nickname or u.unique_id or 'Misafir')[:40],avatar=avatar_url(u))
     @client.on(ConnectEvent)
     async def connected(event):
         log.info('TikTok yayınına bağlandı: %s',username)
