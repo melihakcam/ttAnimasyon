@@ -94,9 +94,9 @@ def snapshot():
 class SessionSettings(BaseModel):
     mode: Literal['demo','live']='demo'
     scene: Literal['halay','orbit']='halay'
-    capacity: int=Field(default=24,ge=4,le=60)
+    capacity: int=Field(default=36,ge=4,le=60)
     username: str=Field(default='',max_length=32)
-    layout: Literal['arc','wide','line']='arc'
+    layout: Literal['circle','arc','wide','line']='circle'
     theme: Literal['night','sunset']='night'
     quality: Literal['balanced','high']='balanced'
     music: Literal['halay','drum','off']='halay'
@@ -153,7 +153,7 @@ PROFILES_PATH=ROOT/'runtime'/'profiles.json'
 class GiftBinding(BaseModel):
     name: str=Field(min_length=1,max_length=80)
     gift_id: int=Field(default=0,ge=0)
-    action: Literal['join','speed','drummer','confetti']='join'
+    action: Literal['join','speed','drummer','zurna','confetti']='join'
     points: int=Field(default=1,ge=0,le=10000)
     @field_validator('name')
     @classmethod
@@ -291,21 +291,24 @@ async def stop_session():
     session['running']=False
 
 async def automatic_demo():
-    names=['Melih','Zeynep','Efe','Elif','Baran','Dilan','Deniz','Yağmur','Can','Sinem','Mert','Bahar','Ali','Ceren','Umut','Nehir','Aslı','Emre']
+    # Videodaki gibi izleyiciler hızla yorum yazıp halkaya katılır; ara sıra hediye ve beğeni gelir.
+    names=['Melih','Zeynep','Efe','Elif','Baran','Dilan','Deniz','Yağmur','Can','Sinem','Mert','Bahar','Ali','Ceren','Umut','Nehir','Aslı','Emre','Duru','Özgür','Nizo','Gamze','Tayyip','Fatoş','Ceylan','Murat','Sevgi','Hazal','Arda','Ebru']
+    comments=['katıl','halaya katıl','katıl','kız','erkek','oğlan','qız','çok güzel','👏👏','yallıya katıl','halay!','harika']
     index=0
     while True:
         async with lock:
             uid='auto'+str(index%60)
             name=names[index%len(names)]+(' '+str(index//len(names)+1) if index>=len(names) else '')
-            payload=dict(type='comment',user_id=uid,name=name,text='erkek' if index%3==0 else 'halay',count=1)
+            payload=dict(type='comment',user_id=uid,name=name,text=comments[(index*7)%len(comments)],count=1)
             if uid not in engine.users and len(engine.users)>=engine.config['max_users']:
                 uid=next(iter(engine.users));payload['user_id']=uid;payload['name']=engine.users[uid]['name']
             engine.apply(payload)
-            if index%4==3:
-                engine.apply(dict(type='gift',user_id=uid,name=payload['name'],gift='Drum' if index%8==7 else 'Rose',count=1))
+            if index%3==2:
+                gift='Drum' if index%12==11 else 'Zurna' if index%12==5 else 'Heart Me' if index%15==14 else 'Rose'
+                engine.apply(dict(type='gift',user_id=uid,name=payload['name'],gift=gift,count=1+index%3))
             await broadcast()
         index+=1
-        await asyncio.sleep(2)
+        await asyncio.sleep(.9 if index<40 else 1.8)
 
 @app.post('/api/session/start')
 async def start_session(settings:SessionSettings):

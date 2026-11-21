@@ -1,10 +1,10 @@
 import {connect} from './transport.js';
 import {HalayMusic} from './music.js';
-import {createHalayStage} from './halay3d.js';
+import {createHalayStage} from './halay3d.js?v=6';
 const canvas=document.querySelector('#stage'),c=canvas.getContext('2d');
 let state={users:[],events:[],bpm:112,scene:'halay'},offset=0;
 const params=new URLSearchParams(location.search),transparent=params.has('transparent'),preview=params.has('preview');
-if(preview){state={...state,bpm:Number(params.get('bpm'))||112,scene:params.get('scene')||'halay',layout:params.get('layout')||'arc',theme:params.get('theme')||'night',quality:'balanced',users:Array.from({length:Math.min(60,Math.max(4,Number(params.get('capacity'))||12))},(_,i)=>({id:'preview'+i,name:['Elif','Melih','Dilan','Can','Nehir','Baran'][i%6],joined:true,points:0,color:['#6f1e35','#214d3c','#202d4b'][i%3],costume:i%3?'kız':'erkek',role:i===0?'drummer':'',bubble:''}))}}
+if(preview){state={...state,bpm:Number(params.get('bpm'))||112,scene:params.get('scene')||'halay',layout:params.get('layout')||'circle',theme:params.get('theme')||'night',quality:'balanced',users:Array.from({length:Math.min(60,Math.max(4,Number(params.get('capacity'))||36))},(_,i)=>({id:'preview'+i,name:['Elif','Melih','Dilan','Can','Nehir','Baran'][i%6],joined:true,points:0,color:['#6f1e35','#214d3c','#202d4b'][i%3],costume:i%3?'kız':'erkek',role:i===0?'drummer':i===1?'zurnaci':'',bubble:''}))}}
 
 let stage;
 try{stage=createHalayStage(document.querySelector('#world'),{transparent})}
@@ -21,18 +21,27 @@ function ellipse(x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,
 function line(points,color,width){c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke()}
 function polygon(points,color){c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill()}
 function portrait(u,x,y,r){
- ellipse(x,y,r+2,r+2,'#f6eed6');ellipse(x,y,r,r,u.color);
+ ellipse(x,y,r+2.5,r+2.5,'#ffffff');ellipse(x,y,r,r,u.color);
  let img=avatars.get(u.avatar);
  if(u.avatar&&!img){img=new Image();img.referrerPolicy='no-referrer';img.src=u.avatar;avatars.set(u.avatar,img);if(avatars.size>100)avatars.delete(avatars.keys().next().value)}
  if(img?.complete&&img.naturalWidth){c.save();c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.clip();c.drawImage(img,x-r,y-r,r*2,r*2);c.restore()}
  else text(u.name.slice(0,2).toLocaleUpperCase('tr'),x,y+r*.31,r*.75);
 }
+function shadowText(s,x,y,size,color='#fff',align='center',weight=700){c.save();c.shadowColor='#000c';c.shadowBlur=4;c.shadowOffsetY=1;text(s,x,y,size,color,align,weight);c.restore()}
+function bubble(msg,x,y){
+ // Beyaz konuşma balonu, altında kuyruk.
+ c.font='700 12px "Segoe UI",sans-serif';const w=Math.max(34,c.measureText(msg).width+18),h=24,bx=Math.max(4,Math.min(536-w,x-w/2));
+ c.save();c.shadowColor='#0006';c.shadowBlur=6;rounded(bx,y-h,w,h,12,'#fffdf8');polygon([[x-6,y-1],[x+6,y-1],[x,y+7]],'#fffdf8');c.restore();text(msg,bx+w/2,y-8,12,'#20181c');
+}
 function hud(t,users){
- rounded(14,15,286,180,14,'#101711e8');text('🏆 En iyi dansçılar',29,43,19,'#f7d66f','left');
- [...users].sort((a,b)=>b.points-a.points).slice(0,5).forEach((u,i)=>{text(String(i+1),29,72+i*25,12,'#b7bfb4','left');portrait(u,61,67+i*25,10);text(u.name.slice(0,17),80,72+i*25,13,'#fff','left');text(String(u.points),283,72+i*25,12,'#ead28b','right')});
- const fast=state.speed_until>t;
- c.strokeStyle='#ffffff20';c.lineWidth=9;c.beginPath();c.arc(482,67,43,.7,Math.PI*2.3);c.stroke();c.strokeStyle='#f8da5c';c.beginPath();c.arc(482,67,43,.7,fast?Math.PI*2.3:4.9);c.stroke();text('♪',482,56,24,'#f8da5c');text(fast?'Hızlı':'Normal',482,80,14);text(String(fast?Math.round(state.bpm*1.45):state.bpm)+' BPM',482,101,11,'#ecdca0');
- rounded(17,875,506,70,15,'#101610ed');text('Yorum yaz, halaya katıl!',270,901,21,'#f4d978');text(`“kız / erkek” ile kıyafet değiştir • ${state.like_threshold||300} beğeni ile katıl`,270,926,12,'#e3e4d1');
+ rounded(12,12,262,168,14,'#0d120fd9');text('🏆 En iyi dansçılar',26,40,18,'#f7d66f','left');
+ [...users].sort((a,b)=>b.points-a.points).slice(0,5).forEach((u,i)=>{const y=66+i*24;if(i===0)text('👑',26,y+5,13,'#ffd76a','left');else text(String(i+1),30,y+5,12,'#cfd3c8','left');portrait(u,58,y,10);text(u.name.slice(0,16),76,y+5,13,'#fff','left');text(String(u.points),262,y+5,12,'#ead28b','right')});
+ const fast=state.speed_until>t,bpm=fast?Math.round(state.bpm*1.45):state.bpm,arc=fast?'#f8da5c':'#8fdc6a';
+ c.strokeStyle='#ffffff22';c.lineWidth=9;c.beginPath();c.arc(484,64,42,.7,Math.PI*2.3);c.stroke();c.strokeStyle=arc;c.beginPath();c.arc(484,64,42,.7,fast?Math.PI*2.3:3.6);c.stroke();
+ shadowText('♪',484,52,22,arc);shadowText(fast?'Hızlı':'Orta',484,76,14);shadowText('♫ '+bpm,484,97,12,'#ecdca0');
+ shadowText('“kız / qız” / “erkek / oğlan” yazınca kıyafet değişir',270,882,13,'#fff');
+ const threshold=state.like_threshold||300,label=`💬 Yorum yaz, halaya katıl! · ya da ${threshold} beğeni`;
+ c.font='700 17px "Segoe UI",sans-serif';const w=c.measureText(label).width+36;rounded(270-w/2,896,w,38,19,'#121512e6');text(label,270,921,17,'#f4d978');
  if(!users.length){rounded(72,347,396,116,20,'#18151ce8');text('Meydan seni bekliyor',270,393,25,'#ffe4a1');text('Yorumlarla halaya otomatik katıl.',270,426,15,'#e5d7cd')}
  if(state.effect_until>t){for(let i=0;i<100;i++){c.fillStyle=['#ffd36a','#ff5386','#8bd7c3'][i%3];c.fillRect((i*71+t*40)%540,((t*140+i*47)%1000)-40,5,10)}}
 }
@@ -48,14 +57,17 @@ function frame(ms){
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,canvas.width,canvas.height);
  const s=Math.min(canvas.width/540,canvas.height/960);c.setTransform(s,0,0,s,(canvas.width-540*s)/2,(canvas.height-960*s)/2);
  const users=state.users.filter(u=>u.joined),labels=stage.render(users,phaseTime,state.bpm,state.scene,{layout:state.layout,theme:state.theme,quality:state.quality});
- const crowded=labels.length>14;let labelIndex=0;
+ const spots=labels.spots;
+ // Boş rol yerleri kürsünün üstünde yazılır; dolu olanlar kişinin isim etiketinin üstünde.
+ if(spots){if(!spots.zurnaTaken)shadowText('🎺 Zurnacı',spots.zurna.x,spots.zurna.y,15,'#ffe9b0');if(!spots.drumTaken)shadowText('🥁 Nağaracı',spots.drum.x,spots.drum.y,15,'#ffe9b0')}
+ const crowded=labels.length>16;
  for(const p of labels){
-  const u=p.user,r=Math.max(10,19*p.scale),drummer=u.role==='drummer';
-  if(drummer)text('🥁 Nağaracı',p.x,p.y-59,16,'#ffe38e');
+  const u=p.user,role=u.role==='drummer'||u.role==='zurnaci',r=role?24:Math.max(9,Math.round(15*p.scale)),size=role?14:Math.max(9,Math.round(11*p.scale));
   portrait(u,p.x,p.y,r);
-  const limit=crowded?9:15,label=u.name.length>limit?u.name.slice(0,limit-1)+'…':u.name,width=Math.max(crowded?40:54,label.length*(crowded?6:7)),labelX=Math.max(width*.5+4,Math.min(536-width*.5,p.x)),labelY=p.y-r-26-(crowded&&!drummer?(labelIndex++%2)*20:0);
-  rounded(labelX-width/2,labelY,width,20,9,drummer?'#b52542':'#111319e8');text(label,labelX,labelY+14,crowded?10:12);
-  if(u.bubble&&u.bubble_until>now){const msg=u.bubble.length>22?u.bubble.slice(0,21)+'…':u.bubble;rounded(p.x-84,p.y-r-61,168,27,10,'#fff4e5');text(msg,p.x,p.y-r-43,12,'#30212a')}
+  const limit=crowded&&!role?11:16,label=u.name.length>limit?u.name.slice(0,limit-1)+'…':u.name;
+  if(role){c.font='700 14px "Segoe UI",sans-serif';const w=c.measureText(label).width+24;rounded(p.x-w/2,p.y-r-30,w,22,11,u.role==='drummer'?'#c0263f':'#8a5a17');text(label,p.x,p.y-r-14,14);shadowText(u.role==='drummer'?'🥁 Nağaracı':'🎺 Zurnacı',p.x,p.y-r-38,15,'#ffe9b0')}
+  else shadowText(label,p.x,p.y-r-5,size);
+  if(u.bubble&&u.bubble_until>now){const msg=u.bubble.length>20?u.bubble.slice(0,19)+'…':u.bubble;bubble(msg,p.x,p.y-r-(role?58:20)-size)}
  }
  hud(now,users);if(preview){rounded(170,823,200,30,12,'#171b24dc');text('ÖNİZLEME · örnek katılımcılar',270,843,12,'#ead28b')}requestAnimationFrame(frame);
 }requestAnimationFrame(frame);

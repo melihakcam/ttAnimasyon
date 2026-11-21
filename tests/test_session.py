@@ -55,13 +55,13 @@ class SessionFlow(unittest.TestCase):
 class SceneOptions(unittest.TestCase):
     def test_layout_theme_and_quality_follow_session(self):
         with TestClient(app,base_url='http://127.0.0.1:8765') as client:
-            for layout in ['arc','wide','line']:
+            for layout in ['circle','arc','wide','line']:
                 r=client.post('/api/session/start',json={'mode':'demo','capacity':12,'layout':layout,'theme':'sunset','quality':'high'})
                 self.assertEqual(r.status_code,200,r.text)
                 state=client.get('/api/state').json()
                 self.assertEqual((state['layout'],state['theme'],state['quality']),(layout,'sunset','high'))
                 client.post('/api/session/stop',json={})
-            for setting in [{'layout':'circle'},{'theme':'bad'},{'quality':'ultra'}]:
+            for setting in [{'layout':'spiral'},{'theme':'bad'},{'quality':'ultra'}]:
                 self.assertEqual(client.post('/api/session/start',json=setting).status_code,422)
     def test_saved_settings_survive_a_fresh_read(self):
         from tempfile import TemporaryDirectory

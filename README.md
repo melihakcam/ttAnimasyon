@@ -7,7 +7,8 @@ Yerel bilgisayarda çalışan, hazırlık yapıp profil seçerek başlatabilece�
 1. **BASLAT.cmd** dosyasını çift tıkla. Sunucu açılır ve hazırlık ekranı ayrı bir stüdyo penceresinde gelir. Tekrar açarsan aynı sunucu kullanılır. Pencereyi kapatmak sunucuyu durdurmaz.
 2. **Kayıtlı hazırlıklarım** bölümünden bir profil seç veya yeni hazırlık yap.
 3. Sahne modülünü seç: **Halay meydanı** veya **Ritmik halay**.
-4. Düzeni seç: **Yay**, **Geniş yay**, **Sıra**. Üçü de el ele ve ortak ritimdedir; karşılıklı eşleşme yoktur.
+4. Düzeni seç: **Halka** (varsayılan, referans videodaki gibi), **Yay**, **Geniş yay**, **Sıra**. Hepsi el ele ve ortak ritimdedir. Halkada herkes ortaya dönük, kollar yukarıda; az kişide halka arkadan dolmaya başlar, yeterli kişi gelince kapanır ve yavaşça döner. Kamera halkanın ön kenarının üstündedir; ortada minder, solda Zurnacı, sağda Nağaracı kürsüsü vardır.
+   - **Zurnacı**: "Zurnacı olsun" davranışlı hediye (varsayılan: Zurna, Finger Heart). **Nağaracı**: "Nağaracı olsun" davranışlı hediye (Drum, Davul). Rol sahipleri halka doluyken de sahneye alınır.
 5. Kişi sayısını **4–60** arasında seç. Sağdaki örnek önizleme, gerçek oturumdan bağımsızdır.
 6. **Gece / Gün batımı** ışığını ve **Dengeli / Yüksek** kaliteyi seç. Zayıf ekran kartında dengeli kullan.
 7. **Hediye ve katılım kuralları** bölümünde dans hızını (60–220 BPM), katılım beğeni eşiğini, hediye adı/kimliği → davranış/puan eşleşmelerini düzenle. Hediye davranışları: katıl, hızlandır, davulcu, konfeti. En fazla 40 kural; tanınmayan hediye varsayılan 1 puanla katılım sağlar.
