@@ -1,7 +1,7 @@
 import subprocess,sys,time,os,json,uuid
 from pathlib import Path
 from urllib.request import urlopen
-ROOT=Path(r'D:\tiktokAnimasyon')
+ROOT=Path(__file__).resolve().parents[1]
 os.environ['TEMP']=str(ROOT/'work');os.environ['TMP']=str(ROOT/'work');os.environ['PYTHONDONTWRITEBYTECODE']='1'
 try:
     with urlopen('http://127.0.0.1:8765/api/state',timeout=1):

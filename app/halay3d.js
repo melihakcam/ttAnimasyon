@@ -36,9 +36,59 @@ function dressFabric(color){
  for(let y=10;y<256;y+=22){ctx.fillStyle='#d8b867aa';ctx.beginPath();ctx.moveTo(128,y-5);ctx.lineTo(132,y);ctx.lineTo(128,y+5);ctx.lineTo(124,y);ctx.fill()}
  const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;const material=new T.MeshStandardMaterial({map:tex,roughness:.92,metalness:.02});materials.set(key,material);return material;
 }
+// "Dansçını seç" kostümleri: hayvan maskotları ve malzeme stilleri.
+const ANIMALS={
+ 'ayı':{fur:'#6b4630',muzzle:'#c49a72',ears:'round'},
+ 'tilki':{fur:'#c8622a',muzzle:'#f3e7d8',ears:'pointy',tip:'#2b1d17',tail:'#c8622a'},
+ 'kedi':{fur:'#8d8a86',muzzle:'#efe8de',ears:'cat',whiskers:true},
+ 'tavşan':{fur:'#ece6de',muzzle:'#fbf6f0',ears:'long',inner:'#e9a7b2',tail:'#ffffff'},
+ 'koyun':{fur:'#f1ece2',face:'#2b2522',muzzle:'#3a312c',ears:'side',wool:true},
+ 'penguen':{fur:'#1b1c22',muzzle:'#f2f0ea',ears:'none',beak:'#f0a232',belly:'#f4f1ea'}
+};
+const STYLES=new Set(['oyuncak','ahşap','köşeli']);
+function woodMaterial(dark){
+ const key='wood:'+dark;if(materials.has(key))return materials.get(key);
+ const cn=document.createElement('canvas');cn.width=cn.height=256;const ctx=cn.getContext('2d');
+ ctx.fillStyle=dark?'#6b4428':'#b07a48';ctx.fillRect(0,0,256,256);
+ for(let i=0;i<70;i++){ctx.strokeStyle=i%3?'#00000018':'#ffffff14';ctx.lineWidth=1+i%3;ctx.beginPath();const y=i*3.7;ctx.moveTo(0,y);for(let x=0;x<=256;x+=16)ctx.lineTo(x,y+Math.sin(x*.05+i)*4);ctx.stroke()}
+ const tex=new T.CanvasTexture(cn);tex.colorSpace=T.SRGBColorSpace;const m=new T.MeshStandardMaterial({map:tex,roughness:.7});materials.set(key,m);return m;
+}
+function toyMaterial(source,hash){
+ // Parlak plastik: dokuyu bırakır, rengi doygunlaştırır.
+ const base=new T.Color(source.color);if(source.map)base.set(['#e63946','#2a9d8f','#457bdc','#f4a261','#9b5de5'][hash%5]);
+ const hsl={};base.getHSL(hsl);const key='toy:'+base.getHexString();if(materials.has(key))return materials.get(key);
+ const m=new T.MeshStandardMaterial({color:new T.Color().setHSL(hsl.h,Math.min(1,hsl.s*1.4+.15),Math.min(.62,Math.max(.3,hsl.l*1.15))),roughness:.28,metalness:.05});materials.set(key,m);return m;
+}
+function animalHead(body,kind,a){
+ const fur=mat(a.fur,.85),face=mat(a.face||a.fur,.85),muzzle=mat(a.muzzle,.8),dark=mat('#120f10',.4);
+ ell(body,face,0,1.6,0,.095,.1,.095);
+ if(kind==='penguen'){for(const x of [-.035,.035])ell(body,mat('#f2f0ea',.8),x,1.62,.06,.035,.045,.03);const beak=mesh(geo('beak',()=>new T.ConeGeometry(.025,.08,10)),mat(a.beak,.5),body,0,1.585,.11);beak.rotation.x=Math.PI/2;ell(body,mat(a.belly,.85),0,1.15,.07,.12,.26,.07)}
+ else{ell(body,muzzle,0,1.575,.07,.05,.04,.045);ell(body,dark,0,1.59,.11,.016,.012,.01)}
+ for(const x of [-.034,.034])ell(body,dark,x,1.63,.08,.012,.014,.006);
+ const ears=[];
+ if(a.ears==='round')for(const s of [-1,1])ears.push(ell(body,fur,s*.07,1.69,-.005,.035,.035,.02));
+ if(a.ears==='pointy'||a.ears==='cat')for(const s of [-1,1]){const h=a.ears==='cat'?.07:.1,e=mesh(geo('ear'+h,()=>new T.ConeGeometry(.04,h,4)),fur,body,s*.06,1.7+h*.3,-.01);e.rotation.z=-s*.25;if(a.tip)mesh(geo('eartip',()=>new T.ConeGeometry(.018,.035,4)),mat(a.tip),body,s*.06+(-s*.25)*-.035,1.7+h*.3+h*.38,-.01).rotation.z=-s*.25}
+ if(a.ears==='long')for(const s of [-1,1]){const e=ell(body,fur,s*.04,1.78,-.01,.028,.13,.016);e.rotation.z=-s*.12;const inner=ell(body,mat(a.inner,.8),s*.04,1.78,.004,.015,.1,.008);inner.rotation.z=-s*.12}
+ if(a.ears==='side')for(const s of [-1,1]){const e=ell(body,face,s*.1,1.62,0,.06,.02,.025);e.rotation.z=s*.3}
+ if(a.wool){const wool=mat(a.fur,1);for(let i=0;i<7;i++){const ang=i/7*Math.PI*2;ell(body,wool,Math.sin(ang)*.06,1.68+Math.cos(ang*2)*.01,Math.cos(ang)*.05-.01,.045,.04,.045)}}
+ if(a.whiskers)for(const s of [-1,1])for(const dy of [-.008,.008]){const w=bone(body,mat('#f5f5f0'),.0025);segment(w,v(s*.03,1.575+dy,.1),v(s*.12,1.57+dy*2,.09))}
+ if(a.tail){const t=ell(body,mat(a.tail,.85),0,.85,-.3,kind==='tavşan'?.06:.07,kind==='tavşan'?.06:.07,kind==='tavşan'?.06:.22);t.rotation.x=kind==='tavşan'?0:-.6}
+ return ears;
+}
+function applyStyle(root,kind,hash){
+ if(!STYLES.has(kind))return;
+ const lowSphere=geo('lowsphere',()=>new T.IcosahedronGeometry(1,0)),lowSkirt=geo('lowskirt',()=>new T.CylinderGeometry(.13,.34,1.03,7));
+ root.traverse(o=>{
+  if(!o.isMesh)return;const m=o.material;
+  if(kind==='ahşap')o.material=woodMaterial(m.metalness>.2);
+  else if(kind==='oyuncak')o.material=toyMaterial(m,hash+(m.metalness>.2?2:0));
+  else{const key='flat:'+m.uuid;if(!materials.has(key)){const f=m.clone();f.flatShading=true;f.needsUpdate=true;materials.set(key,f)}o.material=materials.get(key);if(o.geometry===sphere)o.geometry=lowSphere;if(o.geometry===geometries.get('longskirt')){o.geometry=lowSkirt;o.position.y=.535}}
+ });
+}
 function makeActor(user){
  const root=new T.Group(),body=new T.Group();root.add(body);
- const hash=[...user.id].reduce((a,ch)=>a+ch.charCodeAt(0),0),skin=mat(['#c99b78','#d9b08e','#b88763','#e2bc9c'][hash%4],.6),cloth=dressFabric(user.color||'#6d2333'),plain=mat(user.color||'#6d2333',.9),gold=mat('#b89244',.4,.45),dark=mat('#141216',.7),hair=mat(['#1d1411','#33201a','#141215','#4a2c1d'][hash%4],.55);
+ const kind=user.costume,animal=ANIMALS[kind];
+ const hash=[...user.id].reduce((a,ch)=>a+ch.charCodeAt(0),0),skin=animal?mat(animal.fur,.85):mat(['#c99b78','#d9b08e','#b88763','#e2bc9c'][hash%4],.6),cloth=animal?mat(animal.fur,.95):dressFabric(user.color||'#6d2333'),plain=animal?mat(animal.fur,.9):mat(user.color||'#6d2333',.9),gold=mat('#b89244',.4,.45),dark=mat('#141216',.7),hair=mat(['#1d1411','#33201a','#141215','#4a2c1d'][hash%4],.55);
  const female=user.costume!=='erkek';
  // Gövde: ince bel, dar omuz; boy yaklaşık 1.75.
  if(female){
@@ -58,6 +108,8 @@ function makeActor(user){
  }
  // Boyun ve oranlı baş; küçük yüz ayrıntıları.
  ell(body,skin,0,1.48,0,.045,.06,.045);
+ if(animal)animalHead(body,kind,animal);
+ else{
  ell(body,skin,0,1.6,0,.078,.1,.085);
  ell(body,skin,0,1.575,.075,.013,.02,.016);
  for(const x of [-.028,.028])ell(body,dark,x,1.615,.072,.009,.006,.004);
@@ -73,8 +125,9 @@ function makeActor(user){
   mesh(geo('kalpak',()=>new T.CylinderGeometry(.075,.085,.085,20)),dark,body,0,1.71,-.005);
   ell(body,hair,0,1.555,.07,.045,.012,.012);
  }
+ }
  const legs=[];for(const side of [-1,1]){
-  const upper=bone(body,female?dark:mat('#1d1b22',.9),female?.045:.06),lower=bone(body,female?dark:mat('#1d1b22',.9),.045),shoe=ell(body,dark,side*.11,.065,.065,.06,.05,.13);
+  const upper=bone(body,female?dark:mat('#1d1b22',.9),female?.045:.06),lower=bone(body,female?dark:mat('#1d1b22',.9),.045),shoe=ell(body,kind==='penguen'?mat('#f0a232',.5):dark,side*.11,.065,.065,.06,.05,.13);
   legs.push({side,upper,lower,shoe});
  }
  const sleeve=female?cloth:mat('#e6dccb',.85),cuff=female?gold:sleeve;
@@ -98,6 +151,7 @@ function makeActor(user){
   const lip=mesh(geo('zurnalip',()=>new T.TorusGeometry(.05,.009,6,20)),gold,body,0,0,0);lip.position.copy(zurna.bell);lip.quaternion.copy(pipe.quaternion);lip.rotateX(Math.PI/2);
  }
  const flag=new T.Mesh(new T.PlaneGeometry(.22,.28,6,8),new T.MeshStandardMaterial({color:'#b82536',roughness:1,side:T.DoubleSide}));flag.visible=false;body.add(flag);
+ applyStyle(root,kind,hash);
  return {root,body,user,legs,arms,drum,zurna,flag,phase:hash*.001};
 }
 function updateLegs(a,time,beat,scale){

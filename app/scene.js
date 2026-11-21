@@ -39,6 +39,7 @@ function hud(t,users){
  const fast=state.speed_until>t,bpm=fast?Math.round(state.bpm*1.45):state.bpm,arc=fast?'#f8da5c':'#8fdc6a';
  c.strokeStyle='#ffffff22';c.lineWidth=9;c.beginPath();c.arc(484,64,42,.7,Math.PI*2.3);c.stroke();c.strokeStyle=arc;c.beginPath();c.arc(484,64,42,.7,fast?Math.PI*2.3:3.6);c.stroke();
  shadowText('♪',484,52,22,arc);shadowText(fast?'Hızlı':'Orta',484,76,14);shadowText('♫ '+bpm,484,97,12,'#ecdca0');
+ shadowText('Dansçını seç: oyuncak · ahşap · köşeli · ayı · tilki · kedi · tavşan · koyun · penguen yaz',270,862,11,'#f1e6c8');
  shadowText('“kız / qız” / “erkek / oğlan” yazınca kıyafet değişir',270,882,13,'#fff');
  const threshold=state.like_threshold||300,label=`💬 Yorum yaz, halaya katıl! · ya da ${threshold} beğeni`;
  c.font='700 17px "Segoe UI",sans-serif';const w=c.measureText(label).width+36;rounded(270-w/2,896,w,38,19,'#121512e6');text(label,270,921,17,'#f4d978');

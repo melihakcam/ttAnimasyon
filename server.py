@@ -293,13 +293,13 @@ async def stop_session():
 async def automatic_demo():
     # Videodaki gibi izleyiciler hızla yorum yazıp halkaya katılır; ara sıra hediye ve beğeni gelir.
     names=['Melih','Zeynep','Efe','Elif','Baran','Dilan','Deniz','Yağmur','Can','Sinem','Mert','Bahar','Ali','Ceren','Umut','Nehir','Aslı','Emre','Duru','Özgür','Nizo','Gamze','Tayyip','Fatoş','Ceylan','Murat','Sevgi','Hazal','Arda','Ebru']
-    comments=['katıl','halaya katıl','katıl','kız','erkek','oğlan','qız','çok güzel','👏👏','yallıya katıl','halay!','harika']
+    comments=['katıl','halaya katıl','katıl','kız','erkek','oğlan','qız','çok güzel','👏👏','yallıya katıl','halay!','harika','ayı','tilki','kedi','tavşan','koyun','penguen','oyuncak','ahşap','köşeli']
     index=0
     while True:
         async with lock:
             uid='auto'+str(index%60)
             name=names[index%len(names)]+(' '+str(index//len(names)+1) if index>=len(names) else '')
-            payload=dict(type='comment',user_id=uid,name=name,text=comments[(index*7)%len(comments)],count=1)
+            payload=dict(type='comment',user_id=uid,name=name,text=comments[(index*5)%len(comments)],count=1)
             if uid not in engine.users and len(engine.users)>=engine.config['max_users']:
                 uid=next(iter(engine.users));payload['user_id']=uid;payload['name']=engine.users[uid]['name']
             engine.apply(payload)

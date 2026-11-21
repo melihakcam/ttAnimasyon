@@ -1,6 +1,6 @@
 # Halay Stüdyo
 
-Yerel bilgisayarda çalışan, hazırlık yapıp profil seçerek başlatabileceğin TikTok etkileşim stüdyosu. Bütün proje, bağımlılıklar, geçici dosyalar, profiller ve stüdyo tarayıcı verileri D:\tiktokAnimasyon içindedir. Mevcut Python/Edge/Chrome uygulamaları kurulu yerlerinden okunur; Windows ve OBS kendi kayıtlarını kendi ayarlarına göre tutar.
+Yerel bilgisayarda çalışan, hazırlık yapıp profil seçerek başlatabileceğin TikTok etkileşim stüdyosu. Bütün proje, bağımlılıklar, geçici dosyalar, profiller ve stüdyo tarayıcı verileri proje klasörü içindedir. Mevcut Python/Edge/Chrome uygulamaları kurulu yerlerinden okunur; Windows ve OBS kendi kayıtlarını kendi ayarlarına göre tutar.
 
 ## Aç ve hazırla
 
@@ -34,7 +34,7 @@ Başlangıç örnekleri: Halay 12 kişi, Halay 24 kişi, Sıra 16 kişi. Bunlar�
 
 ## Katılım ve halka doluluğu
 
-Yorum yapan, hediye gönderen veya kişi başına beğeni eşiğine ulaşan kullanıcı katılır. Aynı kullanıcı kimliği aynı kişiyi günceller; görünen ad kimlik yerine geçmez. “kız / qız / erkek / oğlan” kıyafeti değiştirir. Ayrıntılı hayvan modelleri bu 3B sürümde hazır değildir.
+Yorum yapan, hediye gönderen veya kişi başına beğeni eşiğine ulaşan kullanıcı katılır. Aynı kullanıcı kimliği aynı kişiyi günceller; görünen ad kimlik yerine geçmez. “kız / qız / erkek / oğlan” kıyafeti değiştirir. “ayı / tilki / kedi / tavşan / koyun / penguen” yazan dansçı hayvan kostümüne, “oyuncak / ahşap / köşeli” yazan parlak plastik, ahşap oyma veya köşeli (low-poly) görünüme geçer.
 
 Seçilen kişi sayısı aktif katılımcı üst sınırıdır; davulcu da buna dahildir. Halka dolunca yeni katılanlar sıraya alınır. Test panelinden aktif biri çıkarılınca sıradaki otomatik alınır. Süre dolmasıyla otomatik çıkarma yapılmaz. Toplam izlenen kimlik sınırı config.json içindeki max_users (varsayılan 60); aktif ve sıradakilerin toplamı bu sınıra ulaşınca yeni kimlikler kabul edilmez. Mevcut kişilerin olayları işlemeye devam eder.
 
