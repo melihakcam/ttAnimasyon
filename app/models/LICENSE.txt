@@ -1,0 +1,2 @@
+Karakter modelleri: Universal Base Characters, Quaternius (https://quaternius.com)
+Lisans: CC0 1.0 Universal (Public Domain). Sahne için dönüştürüldü: tools/model_build.py

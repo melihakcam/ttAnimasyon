@@ -94,7 +94,7 @@ def snapshot():
 class SessionSettings(BaseModel):
     mode: Literal['demo','live']='demo'
     scene: Literal['halay','orbit']='halay'
-    capacity: int=Field(default=36,ge=4,le=60)
+    capacity: int=Field(default=48,ge=4,le=60)
     username: str=Field(default='',max_length=32)
     layout: Literal['circle','arc','wide','line']='circle'
     theme: Literal['night','sunset']='night'
@@ -293,7 +293,8 @@ async def stop_session():
 async def automatic_demo():
     # Videodaki gibi izleyiciler hızla yorum yazıp halkaya katılır; ara sıra hediye ve beğeni gelir.
     names=['Melih','Zeynep','Efe','Elif','Baran','Dilan','Deniz','Yağmur','Can','Sinem','Mert','Bahar','Ali','Ceren','Umut','Nehir','Aslı','Emre','Duru','Özgür','Nizo','Gamze','Tayyip','Fatoş','Ceylan','Murat','Sevgi','Hazal','Arda','Ebru']
-    comments=['katıl','halaya katıl','katıl','kız','erkek','oğlan','qız','çok güzel','👏👏','yallıya katıl','halay!','harika','ayı','tilki','kedi','tavşan','koyun','penguen','oyuncak','ahşap','köşeli']
+    # Videodaki gibi çoğunluk katılım yorumu; kıyafet ve kostüm komutları arada bir gelir.
+    comments=['katıl','halaya katıl','katıl','çok güzel','katıl','👏👏','yallıya katıl','halay!','katıl','harika','kız','katıl','halaya katıl','qız','çok güzel','katıl','erkek','yallıya katıl','harika','tilki','katıl','kedi','tavşan']
     index=0
     while True:
         async with lock:

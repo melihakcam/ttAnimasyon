@@ -29,7 +29,7 @@ class Engine:
                 raise ValueError('Sahne kapasitesi dolu; katılımcı silin veya sahneyi sıfırlayın.')
             self.users[uid] = dict(id=uid, name=name, points=0, likes=0, joined=False,
                                    costume='kız', avatar='', role='', bubble='', bubble_until=0,
-                                   color=random.choice(['#842738','#154e40','#172d50','#56234b','#24222d']))
+                                   color=random.choice(['#7a1e2c','#842738','#5a1b2a','#1f1a1f','#24222d','#154e40','#172d50']))
         self.users[uid]['name'] = name
         return self.users[uid]
 
