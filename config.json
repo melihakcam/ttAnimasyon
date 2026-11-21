@@ -1,0 +1,32 @@
+{
+  "max_users": 60,
+  "base_bpm": 112,
+  "like_threshold": 1,
+  "gift_rules": {
+    "Rose": {
+      "action": "join",
+      "points": 1
+    },
+    "Gül": {
+      "action": "join",
+      "points": 1
+    },
+    "Heart Me": {
+      "action": "speed",
+      "points": 5
+    },
+    "Drum": {
+      "action": "drummer",
+      "points": 10
+    },
+    "Davul": {
+      "action": "drummer",
+      "points": 10
+    },
+    "Confetti": {
+      "action": "confetti",
+      "points": 20
+    }
+  },
+  "gift_ids": {}
+}

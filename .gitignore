@@ -1,0 +1,21 @@
+# Recreated by KUR.cmd; machine-specific installed dependencies
+.venv/
+__pycache__/
+*.py[cod]
+
+# Browser profiles can contain cookies and account/session credentials
+work/browser-profile/
+work/3d-browser-profile/
+work/audio-browser-profile/
+runtime/studio-browser/
+runtime/studio-cache/
+**/node_modules/
+
+# Transient process files, debug output and credentials
+*.log
+*.pid
+*.tmp
+*.pem
+.env
+.env.*
+!.env.example

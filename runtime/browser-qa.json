@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "checks": [
+    "panel loads",
+    "WebSocket connects",
+    "demo 18 users",
+    "comment joins",
+    "gift points",
+    "300 likes joins",
+    "module switching",
+    "speed control",
+    "mobile layout",
+    "canvas animates",
+    "transparent mode",
+    "no JavaScript errors",
+    "startup scene/capacity selection",
+    "one click automatic demo",
+    "stop session",
+    "live username field",
+    "3D scene rendering",
+    "joined hands at 4/12/24/60 users across 4 dance phases",
+    "shared facing direction",
+    "all three ring layouts",
+    "saved settings",
+    "layout/theme preview",
+    "profile create/load/delete in browser",
+    "gift editor loads"
+  ],
+  "javascript_errors": []
+}

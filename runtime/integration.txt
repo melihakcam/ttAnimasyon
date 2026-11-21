@@ -1,0 +1,4 @@
+HTTP panel/overlay/assets: PASS
+WebSocket broadcast + comment/gift + duplicate delivery: PASS
+New/reconnected client gets current state: PASS
+Invalid count + cross-origin HTTP/WebSocket rejected: PASS

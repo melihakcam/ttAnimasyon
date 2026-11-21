@@ -1,0 +1,27 @@
+HALAY STÜDYO — HIZLI KULLANIM
+
+1. BASLAT.cmd: Stüdyoyu ve hazırlık ekranını açar.
+2. Yeni hazırlık yap veya kayıtlı profil seç.
+3. Sahne, halka düzeni, kişi sayısı, ışık ve kaliteyi ayarla.
+4. İstersen Hediye ve katılım kuralları bölümünü aç: hediye adı/kimliği,
+   davranış, puan, dans hızı ve katılım beğenisi burada düzenlenir.
+5. Hazırlığına isim verip Profili kaydet de. En fazla 20 profil saklanır.
+6. Hesapsız denemek için Otomatik demo seç. Gerçek TikTok için
+   canlı yayının açıkken kullanıcı adını yazıp Başlat de.
+7. OBS Tarayıcı Kaynağı: http://127.0.0.1:8765/overlay
+   Boyut: 1080 x 1920, 30 FPS. Hazırlık ekranını yayına ekleme.
+8. DURDUR.cmd: Stüdyoyu ve varsa TikTok dinleyicisini kapatır.
+
+Oturumu durdur düğmesi sadece otomatik olay akışını kapatır;
+stüdyo açık ve sahne son durumuyla görünür kalır.
+
+Profiller ve ayarlar kalıcıdır. Aktif katılımcılar ve puanlar bellektedir;
+yeni oturum veya uygulamanın kapanması bunları sıfırlar.
+Gerçek TikTok bağlantısı canlı hesapta henüz doğrulanmadı.
+Müzik bölümünde davul-zurna veya yalnız davul seç; Ritmi dinle ile dene.
+Ses seviyesi profille kaydedilir. Başlatınca müzik ve dans birlikte ilerler.
+Sahne Sesi aç düğmesi gösterirse bir kez tıkla.
+OBS'de sesi bu Tarayıcı Kaynağından al; ayrıca aynı müziği çalma.
+Cenaze gibi başka karakter sahneleri bu pakette yoktur; sistem genişletilebilir.
+Tüm proje ve stüdyo tarayıcı profili D:\tiktokAnimasyon içinde tutulur.
+Ayrıntılı bilgi: README.md. Testler: TEST.cmd (önce DURDUR.cmd).

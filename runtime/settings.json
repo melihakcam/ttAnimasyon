@@ -1,0 +1,11 @@
+{
+  "mode": "demo",
+  "scene": "orbit",
+  "capacity": 16,
+  "username": "",
+  "layout": "arc",
+  "theme": "night",
+  "quality": "high",
+  "music": "halay",
+  "volume": 51
+}

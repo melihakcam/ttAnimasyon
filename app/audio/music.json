@@ -1,0 +1,26 @@
+{
+  "title": "Meydan Halayı",
+  "bpm": 112,
+  "beats": 128,
+  "sample_rate": 44100,
+  "loop_seconds": 68.57142857142857,
+  "provenance": "Bu proje için sıfırdan sentezlenen özgün melodi ve davul; dış kayıt veya sample kullanılmadı.",
+  "tracks": {
+    "halay": "/assets/audio/meydan-halay-112.wav",
+    "drum": "/assets/audio/davul-112.wav"
+  },
+  "report": {
+    "full": {
+      "peak": 0.89,
+      "rms": 0.1974139116801087,
+      "seconds": 68.57142857142857,
+      "frames": 3024000
+    },
+    "drums": {
+      "peak": 0.8,
+      "rms": 0.113396661131145,
+      "seconds": 68.57142857142857,
+      "frames": 3024000
+    }
+  }
+}

@@ -1,0 +1,173 @@
+[
+  {
+    "id": "halay12",
+    "name": "Halay · 12 kişi",
+    "settings": {
+      "mode": "demo",
+      "scene": "halay",
+      "capacity": 12,
+      "username": "",
+      "layout": "arc",
+      "theme": "sunset",
+      "quality": "balanced",
+      "music": "halay",
+      "volume": 45
+    },
+    "rules": {
+      "bpm": 112,
+      "like_threshold": 300,
+      "gifts": [
+        {
+          "name": "Rose",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Gül",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Heart Me",
+          "gift_id": 0,
+          "action": "speed",
+          "points": 5
+        },
+        {
+          "name": "Drum",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Davul",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Confetti",
+          "gift_id": 0,
+          "action": "confetti",
+          "points": 20
+        }
+      ]
+    }
+  },
+  {
+    "id": "halay24",
+    "name": "Halay · 24 kişi",
+    "settings": {
+      "mode": "demo",
+      "scene": "halay",
+      "capacity": 24,
+      "username": "",
+      "layout": "arc",
+      "theme": "night",
+      "quality": "balanced",
+      "music": "halay",
+      "volume": 45
+    },
+    "rules": {
+      "bpm": 112,
+      "like_threshold": 300,
+      "gifts": [
+        {
+          "name": "Rose",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Gül",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Heart Me",
+          "gift_id": 0,
+          "action": "speed",
+          "points": 5
+        },
+        {
+          "name": "Drum",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Davul",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Confetti",
+          "gift_id": 0,
+          "action": "confetti",
+          "points": 20
+        }
+      ]
+    }
+  },
+  {
+    "id": "sira16",
+    "name": "Sıra · 16 kişi",
+    "settings": {
+      "mode": "demo",
+      "scene": "halay",
+      "capacity": 16,
+      "username": "",
+      "layout": "line",
+      "theme": "night",
+      "quality": "balanced",
+      "music": "halay",
+      "volume": 45
+    },
+    "rules": {
+      "bpm": 112,
+      "like_threshold": 300,
+      "gifts": [
+        {
+          "name": "Rose",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Gül",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Heart Me",
+          "gift_id": 0,
+          "action": "speed",
+          "points": 5
+        },
+        {
+          "name": "Drum",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Davul",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Confetti",
+          "gift_id": 0,
+          "action": "confetti",
+          "points": 20
+        }
+      ]
+    }
+  }
+]

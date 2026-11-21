@@ -1,0 +1,49 @@
+{
+  "audition": {
+    "status": "playing",
+    "context": "running",
+    "track": "halay",
+    "rate": 1,
+    "position": 0.018666666666666637,
+    "beats": 0.034844444444444386,
+    "volume": 20,
+    "rms": 0.05332661484688085,
+    "error": ""
+  },
+  "synchronized_speed": {
+    "status": "playing",
+    "context": "running",
+    "track": "halay",
+    "rate": 1.45,
+    "position": 0.5379999999999998,
+    "beats": 1.0042666666666664,
+    "volume": 20,
+    "rms": 0.03729571598429308,
+    "error": ""
+  },
+  "live_controls": {
+    "status": "playing",
+    "context": "running",
+    "track": "drum",
+    "rate": 1.45,
+    "position": 1.9029333333333331,
+    "beats": 3.552142222222222,
+    "volume": 12,
+    "rms": 0.01906089997150712,
+    "error": ""
+  },
+  "result": "PASS",
+  "checks": [
+    "non-silent decoded audio",
+    "audition start/stop",
+    "drums-only selection",
+    "autoplay unlock",
+    "audio clock progresses",
+    "dance follows audio beat",
+    "1.45x gift speed",
+    "live track/volume",
+    "mute",
+    "silent embedded preview"
+  ],
+  "javascript_errors": []
+}
