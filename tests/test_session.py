@@ -48,20 +48,20 @@ class SessionFlow(unittest.TestCase):
                 self.assertEqual(client.post('/api/session/stop',json={}).status_code,200)
     def test_rejects_missing_username_and_bad_settings(self):
         with TestClient(app,base_url='http://127.0.0.1:8765') as client:
-            for settings in [{'mode':'live','capacity':12}, {'mode':'demo','capacity':2}, {'mode':'demo','capacity':61}, {'mode':'live','username':'bad name'}, {'scene':'cenaze'}]:
+            for settings in [{'mode':'live','capacity':12}, {'mode':'demo','capacity':2}, {'mode':'demo','capacity':121}, {'mode':'live','username':'bad name'}, {'scene':'cenaze'}]:
                 self.assertEqual(client.post('/api/session/start',json=settings).status_code,422)
             self.assertEqual(client.post('/api/session/start',json={'mode':'demo'},headers={'Origin':'https://untrusted.example'}).status_code,403)
 
 class SceneOptions(unittest.TestCase):
     def test_layout_theme_and_quality_follow_session(self):
         with TestClient(app,base_url='http://127.0.0.1:8765') as client:
-            for layout in ['arc','wide','line']:
+            for layout in ['circle','arc','wide','line']:
                 r=client.post('/api/session/start',json={'mode':'demo','capacity':12,'layout':layout,'theme':'sunset','quality':'high'})
                 self.assertEqual(r.status_code,200,r.text)
                 state=client.get('/api/state').json()
                 self.assertEqual((state['layout'],state['theme'],state['quality']),(layout,'sunset','high'))
                 client.post('/api/session/stop',json={})
-            for setting in [{'layout':'circle'},{'theme':'bad'},{'quality':'ultra'}]:
+            for setting in [{'layout':'spiral'},{'theme':'bad'},{'quality':'ultra'}]:
                 self.assertEqual(client.post('/api/session/start',json=setting).status_code,422)
     def test_saved_settings_survive_a_fresh_read(self):
         from tempfile import TemporaryDirectory

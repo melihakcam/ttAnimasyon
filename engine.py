@@ -14,7 +14,7 @@ class Engine:
         self.speed_until = 0
         self.effect_until = 0
         self.scene = 'halay'
-        self.layout = 'arc'
+        self.layout = 'circle'
         self.theme = 'night'
         self.quality = 'balanced'
         self.music = 'halay'
@@ -29,7 +29,7 @@ class Engine:
                 raise ValueError('Sahne kapasitesi dolu; katılımcı silin veya sahneyi sıfırlayın.')
             self.users[uid] = dict(id=uid, name=name, points=0, likes=0, joined=False,
                                    costume='kız', avatar='', role='', bubble='', bubble_until=0,
-                                   color=random.choice(['#842738','#154e40','#172d50','#56234b','#24222d']))
+                                   color=random.choice(['#7a1e2c','#842738','#5a1b2a','#1f1a1f','#24222d','#154e40','#172d50']))
         self.users[uid]['name'] = name
         return self.users[uid]
 
@@ -55,10 +55,8 @@ class Engine:
                     if uid not in self.users and len(self.users)>=self.config['max_users']: break
                     u = self.user(uid,name)
                     u.update(joined=True, costume='erkek' if i%3==0 else 'kız', points=(18-i)*3)
-                if 'demo0' in self.users:
-                    for other in self.users.values():
-                        if other['role']=='drummer': other['role']=''
-                    self.users['demo0']['role']='drummer'
+                if 'demo0' in self.users: self.assign_role(self.users['demo0'],'drummer')
+                if 'demo1' in self.users: self.assign_role(self.users['demo1'],'zurnaci')
             elif action in ('halay','orbit'):
                 self.scene=action
             elif action == 'speed':
@@ -94,10 +92,8 @@ class Engine:
                 action=rule['action']
                 if action=='speed': self.speed_until=now+min(60,10+e['count']*2)
                 if action=='confetti': self.effect_until=now+8
-                if action=='drummer':
-                    for other in self.users.values():
-                        if other['role']=='drummer': other['role']=''
-                    u['role']='drummer'
+                if action=='drummer': self.assign_role(u,'drummer')
+                if action=='zurna': self.assign_role(u,'zurnaci')
         self.admit()
         if eid:
             self.seen[eid]=True
@@ -107,9 +103,16 @@ class Engine:
         self.events=self.events[-40:]
         return True
 
+    def assign_role(self, user, role):
+        # Nağaracı ve zurnacı tektir; yeni sahibi eskisinin yerini alır.
+        for other in self.users.values():
+            if other['role']==role: other['role']=''
+        user['role']=role
+
     def admit(self):
         count=0
-        for u in self.users.values():
+        # Nağaracı ve zurnacı sahnede görünmeli; halka doluysa sıradan önce alınırlar.
+        for u in sorted(self.users.values(), key=lambda u: not u['role']):
             if not (u['joined'] or u.get('queued')): continue
             count+=1
             u['joined']=count<=self.ring_capacity

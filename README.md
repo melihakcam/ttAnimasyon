@@ -1,13 +1,14 @@
 # Halay Stüdyo
 
-Yerel bilgisayarda çalışan, hazırlık yapıp profil seçerek başlatabileceğin TikTok etkileşim stüdyosu. Bütün proje, bağımlılıklar, geçici dosyalar, profiller ve stüdyo tarayıcı verileri D:\tiktokAnimasyon içindedir. Mevcut Python/Edge/Chrome uygulamaları kurulu yerlerinden okunur; Windows ve OBS kendi kayıtlarını kendi ayarlarına göre tutar.
+Yerel bilgisayarda çalışan, hazırlık yapıp profil seçerek başlatabileceğin TikTok etkileşim stüdyosu. Bütün proje, bağımlılıklar, geçici dosyalar, profiller ve stüdyo tarayıcı verileri proje klasörü içindedir. Mevcut Python/Edge/Chrome uygulamaları kurulu yerlerinden okunur; Windows ve OBS kendi kayıtlarını kendi ayarlarına göre tutar.
 
 ## Aç ve hazırla
 
 1. **BASLAT.cmd** dosyasını çift tıkla. Sunucu açılır ve hazırlık ekranı ayrı bir stüdyo penceresinde gelir. Tekrar açarsan aynı sunucu kullanılır. Pencereyi kapatmak sunucuyu durdurmaz.
 2. **Kayıtlı hazırlıklarım** bölümünden bir profil seç veya yeni hazırlık yap.
 3. Sahne modülünü seç: **Halay meydanı** veya **Ritmik halay**.
-4. Düzeni seç: **Yay**, **Geniş yay**, **Sıra**. Üçü de el ele ve ortak ritimdedir; karşılıklı eşleşme yoktur.
+4. Düzeni seç: **Halka** (varsayılan, referans videodaki gibi), **Yay**, **Geniş yay**, **Sıra**. Hepsi el ele ve ortak ritimdedir. Halkada herkes ortaya dönük, kollar yukarıda; az kişide halka arkadan dolmaya başlar, yeterli kişi gelince kapanır ve yavaşça döner. Kamera halkanın ön kenarının üstündedir; ortada minder, solda Zurnacı, sağda Nağaracı kürsüsü vardır.
+   - **Zurnacı**: "Zurnacı olsun" davranışlı hediye (varsayılan: Zurna, Finger Heart). **Nağaracı**: "Nağaracı olsun" davranışlı hediye (Drum, Davul). Rol sahipleri halka doluyken de sahneye alınır.
 5. Kişi sayısını **4–60** arasında seç. Sağdaki örnek önizleme, gerçek oturumdan bağımsızdır.
 6. **Gece / Gün batımı** ışığını ve **Dengeli / Yüksek** kaliteyi seç. Zayıf ekran kartında dengeli kullan.
 7. **Hediye ve katılım kuralları** bölümünde dans hızını (60–220 BPM), katılım beğeni eşiğini, hediye adı/kimliği → davranış/puan eşleşmelerini düzenle. Hediye davranışları: katıl, hızlandır, davulcu, konfeti. En fazla 40 kural; tanınmayan hediye varsayılan 1 puanla katılım sağlar.
@@ -33,7 +34,7 @@ Başlangıç örnekleri: Halay 12 kişi, Halay 24 kişi, Sıra 16 kişi. Bunlar�
 
 ## Katılım ve halka doluluğu
 
-Yorum yapan, hediye gönderen veya kişi başına beğeni eşiğine ulaşan kullanıcı katılır. Aynı kullanıcı kimliği aynı kişiyi günceller; görünen ad kimlik yerine geçmez. “kız / qız / erkek / oğlan” kıyafeti değiştirir. Ayrıntılı hayvan modelleri bu 3B sürümde hazır değildir.
+Yorum yapan, hediye gönderen veya kişi başına beğeni eşiğine ulaşan kullanıcı katılır. Aynı kullanıcı kimliği aynı kişiyi günceller; görünen ad kimlik yerine geçmez. “kız / qız / erkek / oğlan” kıyafeti değiştirir. “ayı / tilki / kedi / tavşan / koyun / penguen” yazan dansçı hayvan kostümüne, “oyuncak / ahşap / köşeli” yazan parlak plastik, ahşap oyma veya köşeli (low-poly) görünüme geçer.
 
 Seçilen kişi sayısı aktif katılımcı üst sınırıdır; davulcu da buna dahildir. Halka dolunca yeni katılanlar sıraya alınır. Test panelinden aktif biri çıkarılınca sıradaki otomatik alınır. Süre dolmasıyla otomatik çıkarma yapılmaz. Toplam izlenen kimlik sınırı config.json içindeki max_users (varsayılan 60); aktif ve sıradakilerin toplamı bu sınıra ulaşınca yeni kimlikler kabul edilmez. Mevcut kişilerin olayları işlemeye devam eder.
 
@@ -43,7 +44,7 @@ Bağımlılık kurulu. Başka bilgisayarda önce KUR.cmd, isteğe bağlı canlı
 
 TikTokLive 7.0.1 üçüncü taraf kütüphanedir. Gerçek hesapta uçtan uca bağlantı henüz denenmedi. TikTok değişiklikleri, erişim/imza servisleri veya bölgesel kısıtlar bağlantıyı etkileyebilir. Yerel demo internet gerektirmez; canlı bağlantı internet gerektirir. Kaynak durumu TikTok bağlı demeden yalnızca yerel sunucunun bağlı olması yeterli değildir. Hatalar runtime/tiktok.log içindedir. Dinleyici kapanırsa hazırlık ekranındaki durum güncellenir.
 
-Hediye serilerinde ara mesajlar atlanır, son repeat_count toplamı sayılır. order_id varsa tekrar teslimat önlenir; son 4000 kimlik bellekte tutulur. Dinleyici kuyruğu 1000 olayla sınırlı; gönderilemeyen olaylar loga yazılır, diske kaydedilip yeniden oynatılmaz. Oyun puanları gerçek para/ödül muhasebesi değildir. Avatar fotoğrafı aktarma dinleyicide etkin değil; baş harfler gösterilir.
+Hediye serilerinde ara mesajlar atlanır, son repeat_count toplamı sayılır. order_id varsa tekrar teslimat önlenir; son 4000 kimlik bellekte tutulur. Dinleyici kuyruğu 1000 olayla sınırlı; gönderilemeyen olaylar loga yazılır, diske kaydedilip yeniden oynatılmaz. Oyun puanları gerçek para/ödül muhasebesi değildir. Dinleyici TikTok profil fotoğrafını (HTTPS) aktarır; fotoğraf gelmezse baş harfler gösterilir.
 
 Kaynaklar:
 - https://github.com/isaackogan/TikTokLive
@@ -63,7 +64,7 @@ OBS kaynakları: https://obsproject.com/kb/browser-source ve https://obsproject.
 
 ## Görseller ve genişletme
 
-Karakterler prosedürel 3B; geleneksel kıyafet işlemeleri, halay başının mendili, davul, halı, minder, fener, taş meydan, sıcak/soğuk ışık ve gölgeler var. Ortak el hedefleri ve eşzamanlı adımlar zinciri korur. Stilize modellerdir; referans videodaki özgün varlıkların kopyası değildir.
+Karakterler prosedürel 3B; ince-uzun oranlar, yere kadar uzun elbiseler, uzun saç, sikke alınlık, loş fener ışığı, geleneksel kıyafet işlemeleri, halay başının mendili, davul, halı, minder, fener, taş meydan, sıcak/soğuk ışık ve gölgeler var. Ortak el hedefleri ve eşzamanlı adımlar zinciri korur. Stilize modellerdir; referans videodaki özgün varlıkların kopyası değildir.
 
 Çalışan iki halay hareket modülü vardır. Cenaze gibi başka temalı karakter/sahne modülleri henüz eklenmedi. Yeni profil kaydetmek yeni karakter modeli üretmez. Yeni animasyonlar aynı olay ve profil yapısına kod/varlık eklenerek genişletilebilir.
 

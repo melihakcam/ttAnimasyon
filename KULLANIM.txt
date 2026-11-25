@@ -23,5 +23,5 @@ Ses seviyesi profille kaydedilir. Başlatınca müzik ve dans birlikte ilerler.
 Sahne Sesi aç düğmesi gösterirse bir kez tıkla.
 OBS'de sesi bu Tarayıcı Kaynağından al; ayrıca aynı müziği çalma.
 Cenaze gibi başka karakter sahneleri bu pakette yoktur; sistem genişletilebilir.
-Tüm proje ve stüdyo tarayıcı profili D:\tiktokAnimasyon içinde tutulur.
+Tüm proje ve stüdyo tarayıcı profili proje klasörü içinde tutulur.
 Ayrıntılı bilgi: README.md. Testler: TEST.cmd (önce DURDUR.cmd).

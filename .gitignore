@@ -19,3 +19,5 @@ runtime/studio-cache/
 .env
 .env.*
 !.env.example
+
+work/ubc-kaynak/

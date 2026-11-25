@@ -1,7 +1,7 @@
 import asyncio,json,os
 from pathlib import Path
 from playwright.async_api import async_playwright
-ROOT=Path(r'D:\tiktokAnimasyon')
+ROOT=Path(__file__).resolve().parents[1]
 os.environ['TEMP']=str(ROOT/'work');os.environ['TMP']=str(ROOT/'work')
 async def main():
  errors=[];report={}

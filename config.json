@@ -1,7 +1,7 @@
 {
-  "max_users": 60,
+  "max_users": 150,
   "base_bpm": 112,
-  "like_threshold": 1,
+  "like_threshold": 300,
   "gift_rules": {
     "Rose": {
       "action": "join",
@@ -26,6 +26,14 @@
     "Confetti": {
       "action": "confetti",
       "points": 20
+    },
+    "Zurna": {
+      "action": "zurna",
+      "points": 10
+    },
+    "Finger Heart": {
+      "action": "zurna",
+      "points": 5
     }
   },
   "gift_ids": {}

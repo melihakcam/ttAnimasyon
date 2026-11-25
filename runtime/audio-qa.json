@@ -4,10 +4,10 @@
     "context": "running",
     "track": "halay",
     "rate": 1,
-    "position": 0.018666666666666637,
-    "beats": 0.034844444444444386,
+    "position": 0.010666666666666658,
+    "beats": 0.019911111111111095,
     "volume": 20,
-    "rms": 0.05332661484688085,
+    "rms": 0.04115617968419189,
     "error": ""
   },
   "synchronized_speed": {
@@ -15,10 +15,10 @@
     "context": "running",
     "track": "halay",
     "rate": 1.45,
-    "position": 0.5379999999999998,
-    "beats": 1.0042666666666664,
+    "position": 0.4096,
+    "beats": 0.7645866666666666,
     "volume": 20,
-    "rms": 0.03729571598429308,
+    "rms": 0.034817454724198386,
     "error": ""
   },
   "live_controls": {
@@ -26,10 +26,10 @@
     "context": "running",
     "track": "drum",
     "rate": 1.45,
-    "position": 1.9029333333333331,
-    "beats": 3.552142222222222,
+    "position": 0.7150666666666667,
+    "beats": 1.3347911111111113,
     "volume": 12,
-    "rms": 0.01906089997150712,
+    "rms": 0.019618695664788882,
     "error": ""
   },
   "result": "PASS",

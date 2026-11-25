@@ -3,9 +3,9 @@ import {HalayMusic} from './music.js';
 const $=s=>document.querySelector(s);let running=false,initial=true,previewTimer;
 let auditioning=false,audioTimer;
 const audition=new HalayMusic((status,error)=>{if(status==='error'){$('#musicstatus').textContent=error;auditioning=false}$('#listenmusic').textContent=auditioning?'Dinlemeyi durdur':'Ritmi dinle'});
-const names={arc:'Yay',wide:'Geniş yay',line:'Sıra'};
+const names={circle:'Halka',arc:'Yay',wide:'Geniş yay',line:'Sıra'};
 function settings(){return {mode:$('#mode').value,scene:document.querySelector('input[name="scene"]:checked').value,layout:document.querySelector('input[name="layout"]:checked').value,theme:$('#theme').value,quality:$('#quality').value,capacity:Number($('#capacity').value),username:$('#username').value,music:$('#music').value,volume:Number($('#volume').value)}}
-function preview(){const s=settings();$('#previewcaption').textContent=`${names[s.layout]} · ${s.capacity} kişi`;document.querySelectorAll('[data-capacity]').forEach(b=>b.classList.toggle('active',Number(b.dataset.capacity)===s.capacity));clearTimeout(previewTimer);previewTimer=setTimeout(()=>{if(s.capacity>=4&&s.capacity<=60)$('#preview').src='/overlay?preview=1&'+new URLSearchParams({layout:s.layout,theme:s.theme,capacity:s.capacity,scene:s.scene,bpm:Number($('#bpm').value)||112})},250)}
+function preview(){const s=settings();$('#previewcaption').textContent=`${names[s.layout]} · ${s.capacity} kişi`;document.querySelectorAll('[data-capacity]').forEach(b=>b.classList.toggle('active',Number(b.dataset.capacity)===s.capacity));clearTimeout(previewTimer);previewTimer=setTimeout(()=>{if(s.capacity>=4&&s.capacity<=120)$('#preview').src='/overlay?preview=1&'+new URLSearchParams({layout:s.layout,theme:s.theme,capacity:s.capacity,scene:s.scene,bpm:Number($('#bpm').value)||112})},250)}
 function fill(s){for(const id of ['mode','username','capacity','theme','quality','music','volume'])if(s[id]!==undefined)$('#'+id).value=s[id];for(const key of ['scene','layout']){const radio=document.querySelector(`input[name="${key}"][value="${s[key]}"]`);if(radio)radio.checked=true}$('#mode').onchange();musicUI();preview()}
 $('#mode').onchange=()=>{const live=$('#mode').value==='live';$('#userrow').hidden=!live;$('#liveinfo').hidden=!live;$('#username').required=live};
 for(const input of document.querySelectorAll('[name="layout"],[name="scene"],#capacity,#theme'))input.addEventListener('input',preview);
@@ -23,7 +23,7 @@ function ruleRow(rule={name:'',gift_id:0,action:'join',points:1}){
  const grid=document.createElement('div');grid.className='rulegrid';row.append(grid);
  for(const [field,label,type] of [['name','Hediye adı','text'],['gift_id','Hediye kimliği · isteğe bağlı','number'],['action','Ne yapsın?','select'],['points','Adet başına puan','number']]){
   const wrapper=document.createElement('label');wrapper.textContent=label;let input;
-  if(type==='select'){input=document.createElement('select');for(const [value,title] of [['join','Halaya katıl'],['speed','Hızlandır'],['drummer','Davulcu olsun'],['confetti','Konfeti göster']])input.add(new Option(title,value))}
+  if(type==='select'){input=document.createElement('select');for(const [value,title] of [['join','Halaya katıl'],['speed','Hızlandır'],['drummer','Nağaracı olsun'],['zurna','Zurnacı olsun'],['confetti','Konfeti göster']])input.add(new Option(title,value))}
   else{input=document.createElement('input');input.type=type;if(type==='number'){input.min='0';input.max=field==='points'?'10000':'999999999'}if(field==='name'){input.required=true;input.maxLength=80}}
   input.dataset.field=field;input.value=field==='gift_id'&&!rule[field]?'':rule[field];wrapper.append(input);grid.append(wrapper);
  }
