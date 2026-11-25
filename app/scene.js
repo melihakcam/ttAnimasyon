@@ -1,10 +1,10 @@
 import {connect} from './transport.js';
 import {HalayMusic} from './music.js';
-import {createHalayStage} from './halay3d.js?v=10';
+import {createHalayStage} from './halay3d.js?v=16';
 const canvas=document.querySelector('#stage'),c=canvas.getContext('2d');
 let state={users:[],events:[],bpm:112,scene:'halay'},offset=0;
 const params=new URLSearchParams(location.search),transparent=params.has('transparent'),preview=params.has('preview');
-if(preview){state={...state,bpm:Number(params.get('bpm'))||112,scene:params.get('scene')||'halay',layout:params.get('layout')||'circle',theme:params.get('theme')||'night',quality:'balanced',users:Array.from({length:Math.min(60,Math.max(4,Number(params.get('capacity'))||48))},(_,i)=>({id:'preview'+i,name:['Elif','Melih','Dilan','Can','Nehir','Baran'][i%6],joined:true,points:0,color:['#7a1e2c','#1f1a1f','#154e40','#5a1b2a','#172d50'][i%5],costume:i%7?'kız':'erkek',role:i===0?'drummer':i===1?'zurnaci':'',bubble:''}))}}
+if(preview){state={...state,bpm:Number(params.get('bpm'))||112,scene:params.get('scene')||'halay',layout:params.get('layout')||'circle',theme:params.get('theme')||'night',quality:'balanced',users:Array.from({length:Math.min(120,Math.max(4,Number(params.get('capacity'))||80))},(_,i)=>({id:'preview'+i,name:['Elif','Melih','Dilan','Can','Nehir','Baran'][i%6],joined:true,points:0,color:['#7a1e2c','#1f1a1f','#154e40','#5a1b2a','#172d50'][i%5],costume:i%7?'kız':'erkek',role:i===0?'drummer':i===1?'zurnaci':'',bubble:''}))}}
 
 let stage;
 try{stage=createHalayStage(document.querySelector('#world'),{transparent})}

@@ -48,7 +48,7 @@ class SessionFlow(unittest.TestCase):
                 self.assertEqual(client.post('/api/session/stop',json={}).status_code,200)
     def test_rejects_missing_username_and_bad_settings(self):
         with TestClient(app,base_url='http://127.0.0.1:8765') as client:
-            for settings in [{'mode':'live','capacity':12}, {'mode':'demo','capacity':2}, {'mode':'demo','capacity':61}, {'mode':'live','username':'bad name'}, {'scene':'cenaze'}]:
+            for settings in [{'mode':'live','capacity':12}, {'mode':'demo','capacity':2}, {'mode':'demo','capacity':121}, {'mode':'live','username':'bad name'}, {'scene':'cenaze'}]:
                 self.assertEqual(client.post('/api/session/start',json=settings).status_code,422)
             self.assertEqual(client.post('/api/session/start',json={'mode':'demo'},headers={'Origin':'https://untrusted.example'}).status_code,403)
 

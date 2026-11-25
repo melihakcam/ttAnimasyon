@@ -169,5 +169,74 @@
         }
       ]
     }
+  },
+  {
+    "id": "56c3ee20292140a2bb90c71c0a4415cc",
+    "name": "elsiwfrnıobje",
+    "settings": {
+      "mode": "demo",
+      "scene": "halay",
+      "capacity": 48,
+      "username": "",
+      "layout": "circle",
+      "theme": "night",
+      "quality": "high",
+      "music": "halay",
+      "volume": 51
+    },
+    "rules": {
+      "bpm": 112,
+      "like_threshold": 300,
+      "gifts": [
+        {
+          "name": "Rose",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Gül",
+          "gift_id": 0,
+          "action": "join",
+          "points": 1
+        },
+        {
+          "name": "Heart Me",
+          "gift_id": 0,
+          "action": "speed",
+          "points": 5
+        },
+        {
+          "name": "Drum",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Davul",
+          "gift_id": 0,
+          "action": "drummer",
+          "points": 10
+        },
+        {
+          "name": "Confetti",
+          "gift_id": 0,
+          "action": "confetti",
+          "points": 20
+        },
+        {
+          "name": "Zurna",
+          "gift_id": 0,
+          "action": "zurna",
+          "points": 10
+        },
+        {
+          "name": "Finger Heart",
+          "gift_id": 0,
+          "action": "zurna",
+          "points": 5
+        }
+      ]
+    }
   }
 ]

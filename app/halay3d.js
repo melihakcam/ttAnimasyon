@@ -183,20 +183,29 @@ function rotateBone(bone,axisRoot,angle,root){
  _axis.copy(axisRoot).applyQuaternion(root.quaternion);bone.parent.getWorldQuaternion(_q).invert();_axis.applyQuaternion(_q).normalize();
  bone.quaternion.premultiply(_q2.setFromAxisAngle(_axis,angle));
 }
+// Videodaki halay adımı: 4 vuruşluk döngü. 1: sağa adım, 2: sol ayak yanaşır, 3: dizler kırılıp çökülür, 4: sol ayakla öne vuruş.
+function halayStep(time,bpm){
+ const b=time*bpm/60,p=((b%4)+4)%4,arc=x=>Math.sin(Math.max(0,Math.min(1,x))*Math.PI);
+ return {beats:b,p,liftR:p<1?arc(p):0,liftL:p>=1&&p<2?arc(p-1):0,dip:p>=2&&p<3?arc(p-2):0,kick:p>=3?arc(p-3):0,
+  advance:Math.floor(b/4)+(p<2?(1-Math.cos(p/2*Math.PI))/2:1)};
+}
 function animateModel(a,time,bpm){
- const {bone,rest}=a.model,cycle=time*bpm/60*Math.PI*2;
+ const {bone,rest}=a.model,h=halayStep(time,bpm);
  for(const [b,q] of rest)b.quaternion.copy(q);
- a.body.position.y=Math.max(0,Math.sin(cycle*2))*.03;a.body.rotation.z=Math.sin(cycle)*.02;
+ const pose=a.pose||{},sit=pose.sit||0,walk=pose.walk||0,dance=(1-sit)*(1-walk)*(a.user?.role?.6:1);
+ a.body.position.y=(-h.dip*.07+(h.liftR+h.liftL)*.012+h.kick*.015)*dance-sit*.4;a.body.rotation.z=0;
  a.root.updateMatrixWorld(true);
- const X=v(1,0,0),Z=v(0,0,1);
+ const X=v(1,0,0),Z=v(0,0,1),legs={r:{lift:h.liftR,kick:0},l:{lift:h.liftL,kick:h.kick}};
  for(const [s,phase] of [['l',0],['r',Math.PI]]){
-  const step=Math.sin(cycle+phase);
-  rotateBone(bone['thigh_'+s],X,-step*.22-.04,a.root);
+  const w=Math.sin((pose.stride||0)+phase)*walk,L=legs[s];
+  rotateBone(bone['thigh_'+s],X,-(L.lift*.32+h.dip*.32+L.kick*.5)*dance-w*.45-sit*1.45,a.root);
   bone['thigh_'+s].updateMatrixWorld(true);
-  rotateBone(bone['calf_'+s],X,Math.max(0,Math.sin(cycle+phase))*.38,a.root);
+  rotateBone(bone['calf_'+s],X,(L.lift*.75+h.dip*.62+L.kick*.08)*dance+Math.max(0,w)*.6+sit*1.5,a.root);
  }
- rotateBone(bone.spine_02,Z,Math.sin(cycle)*.04,a.root);
- rotateBone(bone.Head,X,Math.sin(cycle*2)*.04,a.root);
+ // Adım yönüne (sağa) hafif eğilme, çökmede öne eğilme ve baş sallama.
+ rotateBone(bone.spine_02,Z,(h.p<2?Math.sin(h.p/2*Math.PI):0)*.05*dance,a.root);
+ rotateBone(bone.spine_01,X,h.dip*.08*dance,a.root);
+ rotateBone(bone.Head,X,(h.dip*.06-h.kick*.03)*dance,a.root);
  a.root.updateMatrixWorld(true);
 }
 function aimBone(b,childLocal,target){
@@ -293,6 +302,7 @@ function makeActor(user){
 }
 function updateLegs(a,time,beat,scale){
  if(a.model)return animateModel(a,time,beat);
+ if(a.pose?.sit){a.body.position.y=-a.pose.sit*.4;a.root.updateMatrixWorld(true);return}
  const cycle=time*beat/60*Math.PI*2,step=Math.sin(cycle),lift=Math.max(0,Math.sin(cycle*2))*.035;
  a.body.position.y=lift;
  a.body.rotation.z=Math.sin(cycle)*.025;
@@ -356,7 +366,14 @@ export function createHalayStage(canvas,{transparent=false}={}){
   block(backdrop,new T.MeshStandardMaterial({color:'#f2c777',emissive:'#ffb350',emissiveIntensity:1.8}),x,2.75,-3.9,.18,.3,.18);
   const glow=new T.Sprite(new T.SpriteMaterial({map:glowTexture,transparent:true,depthWrite:false}));glow.position.set(x,2.78,-3.85);glow.scale.set(.9,.9,1);backdrop.add(glow);
  }
- const actors=new Map();
+ const view={yaw:0,pitch:0,zoom:1},want={yaw:0,pitch:0,zoom:1};let drag=null;
+ const clampView=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+ canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture?.(e.pointerId)});
+ canvas.addEventListener('pointermove',e=>{if(!drag)return;want.yaw-=(e.clientX-drag.x)*.006;want.pitch=clampView(want.pitch+(e.clientY-drag.y)*.004,-.55,.45);drag={x:e.clientX,y:e.clientY}});
+ for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,()=>{drag=null});
+ canvas.addEventListener('wheel',e=>{e.preventDefault();want.zoom=clampView(want.zoom*Math.exp(e.deltaY*.0012),.45,1.9)},{passive:false});
+ canvas.addEventListener('dblclick',()=>Object.assign(want,{yaw:0,pitch:0,zoom:1}));
+ const actors=new Map(),seen=new Set(),entries=new Map(),createdAt=performance.now()/1000;let warmed=false,lastClock=0;
  loadModels().then(lib=>{MODELS=lib;for(const a of actors.values())scene.remove(a.root);actors.clear()}).catch(err=>console.warn('3B karakter modelleri yüklenemedi, basit karakterler kullanılıyor.',err));let lastSize='',lastLook='',diagnostics={};
  function applyLook(options){
   const theme=options.theme||'night',quality=options.quality||'balanced',signature=theme+quality;if(signature===lastLook)return;lastLook=signature;
@@ -367,31 +384,68 @@ export function createHalayStage(canvas,{transparent=false}={}){
  }
  const project=p=>{const q=p.clone().project(camera);return {x:(q.x*.5+.5)*540,y:(-.5*q.y+.5)*960}};
 
+ function place(a,id,target,yaw,clock,dt){
+  // Yeni kişi: minderde oturur, kalkar, yürüyerek sıranın başına geçer. Diğerleri yumuşakça kayar.
+  const e=entries.get(id);a.pose=null;
+  if(e){
+   if(!e.seat){
+    const side=v(0,0,1).applyAxisAngle(Y,bench.rotation.y),toward=target.clone().sub(bench.position),sign=toward.dot(side)>=0?1:-1;
+    const along=v(1,0,0).applyAxisAngle(Y,bench.rotation.y).multiplyScalar((Math.random()-.5)*1.6);
+    e.seat=bench.position.clone().add(along).addScaledVector(side,.12*sign);e.seat.y=0;e.seatYaw=Math.atan2(side.x*sign,side.z*sign);
+   }
+   const SIT=1.1,STAND=.8,dist=e.seat.distanceTo(target),WALK=Math.max(1.2,dist/1.25),TURN=.6,t=clock-e.start;
+   const ease=x=>x<=0?0:x>=1?1:x*x*(3-2*x),angle=(from,to,k)=>from+Math.atan2(Math.sin(to-from),Math.cos(to-from))*k;
+   const pos=new T.Vector3(),pose={free:true,sit:0,walk:0,stride:t*7.5};let heading;
+   if(t<SIT+STAND){pos.copy(e.seat);pose.sit=1-ease((t-SIT)/STAND);heading=e.seatYaw;
+    const dir=target.clone().sub(e.seat);heading=angle(e.seatYaw,Math.atan2(dir.x,dir.z),ease((t-SIT)/STAND))}
+   else if(t<SIT+STAND+WALK){const k=(t-SIT-STAND)/WALK;pos.copy(e.seat).lerp(target,ease(k));pose.walk=Math.min(1,Math.min(k,1-k)*6);const dir=target.clone().sub(e.seat);heading=Math.atan2(dir.x,dir.z)}
+   else if(t<SIT+STAND+WALK+TURN){pos.copy(target);const dir=target.clone().sub(e.seat);heading=angle(Math.atan2(dir.x,dir.z),yaw,ease((t-SIT-STAND-WALK)/TURN))}
+   else {entries.delete(id);pos.copy(target);heading=yaw;pose.free=false}
+   a.pose=pose.free?pose:null;a.root.position.copy(pos);a.root.rotation.y=heading;a.smooth={pos:pos.clone(),yaw:heading};return;
+  }
+  if(!a.smooth)a.smooth={pos:target.clone(),yaw};
+  const k=dt?1-Math.exp(-dt*7):1;
+  a.smooth.pos.lerp(target,k);a.smooth.yaw+=Math.atan2(Math.sin(yaw-a.smooth.yaw),Math.cos(yaw-a.smooth.yaw))*k;
+  a.root.position.copy(a.smooth.pos);a.root.rotation.y=a.smooth.yaw;
+ }
  function render(users,time,bpm,mode='halay',options={}){
   applyLook(options);
   const ids=new Set(users.map(u=>u.id));for(const [id,a] of actors){if(!ids.has(id)){scene.remove(a.root);actors.delete(id)}}
   for(const u of users){let a=actors.get(u.id);const signature=u.costume+u.color+u.role;if(!a||a.signature!==signature){if(a)scene.remove(a.root);a=makeActor(u);a.signature=signature;actors.set(u.id,a);scene.add(a.root)}a.user=u}
-  const dancers=users.filter(u=>u.role!=='drummer'&&u.role!=='zurnaci'),n=dancers.length;
+  // En son katılan halay başıdır: sıranın başında mendil sallar, diğerleri bir yana kayar.
+  const dancers=users.filter(u=>u.role!=='drummer'&&u.role!=='zurnaci').reverse(),n=dancers.length;
+  const clock=performance.now()/1000,dt=lastClock?Math.min(.1,clock-lastClock):0;lastClock=clock;
+  if(!warmed&&(users.length||clock-createdAt>2)){warmed=true;for(const u of users)seen.add(u.id)}
+  for(const u of dancers)if(!seen.has(u.id)){seen.add(u.id);entries.set(u.id,{start:clock})}
+  for(const id of entries.keys())if(!actors.has(id))entries.delete(id);
   const layout=options.layout||'circle',circle=layout==='circle';
-  const beat=time*bpm/60*Math.PI*2;
+  const beat=time*bpm/60*Math.PI*2,H=halayStep(time,bpm);
   const rows=[];let closed=false,radius=0,drumSpot,zurnaSpot,camPos,camLook;
   if(circle){
-   // Videodaki gibi: herkes ortaya dönük, el ele tek halka. Az kişide halka arkadan dolmaya başlar.
-   const spacing=.54,minRadius=2.7,need=n*spacing;
-   closed=n>2&&need>=Math.PI*2*minRadius;radius=closed?need/(Math.PI*2):minRadius;
-   const step=spacing/radius,first=closed?Math.PI-time*.035:Math.PI+(n-1)*step/2;
-   for(let i=0;i<n;i++){
-    const a=actors.get(dancers[i].id),angle=first-i*step,stepSide=Math.sin(beat)*.05;
-    a.root.position.set(Math.sin(angle)*radius+Math.cos(angle)*stepSide,0,Math.cos(angle)*radius-Math.sin(angle)*stepSide);
-    a.root.rotation.y=angle+Math.PI;a.root.scale.setScalar(1);
-    if(mode==='orbit'){const r=1+Math.sin(beat*.5)*.03;a.root.position.x*=r;a.root.position.z*=r}
-    updateLegs(a,time,bpm,1);rows.push(a);
+   // Videodaki gibi: herkes ortaya dönük, el ele halka. Az kişide halka arkadan dolar; halay başı ile son kişi
+   // arasında küçük bir açıklık kalır. Halka büyüyünce arkasında ikinci, üçüncü sıra oluşur (her sıra kendi içinde el ele).
+   const spacing=.54,minRadius=2.7,maxRadius=4.6,rowGap=.82,fits=r=>Math.floor(Math.PI*2*r/spacing-1.4);
+   const firstFull=(n+1.4)*spacing>=Math.PI*2*minRadius;
+   radius=Math.max(minRadius,Math.min(maxRadius,(n+1.4)*spacing/(Math.PI*2)));
+   let start=0,ring=0,outer=radius;
+   while(start<n){
+    const r=radius+ring*rowGap,count=Math.min(fits(r),n-start),full=ring===0?firstFull:count>=fits(r);outer=r;
+    const step=spacing/r,first=full?Math.PI+H.advance*.2/r+ring*step*.5:Math.PI+(count-1)*step/2;
+    for(let j=0;j<count;j++){
+     const i=start+j,a=actors.get(dancers[i].id),angle=first-j*step;
+     const target=v(Math.sin(angle)*r,0,Math.cos(angle)*r);
+     if(mode==='orbit'){const k=1+Math.sin(beat*.5)*.03;target.x*=k;target.z*=k}
+     a.root.scale.setScalar(1);a.ring=ring;place(a,dancers[i].id,target,angle+Math.PI,clock,dt);
+     updateLegs(a,time,bpm,1);rows.push(a);
+    }
+    start+=count;ring++;
    }
-   const R=radius;
+   // Kamera ve kürsüler yakın kalır; büyük halkanın kenarları videodaki gibi kadrajdan taşar.
+   const R=Math.min(radius,4.2);
    // Kamera halkanın ön kenarının üstünde: öndeki dansçılar kadraj altında kalır, ortadaki kürsüler görünür.
    bench.position.set(.1,0,R*.12);bench.rotation.y=-.42;
    zurnaSpot=v(-R*.4,0,R*.3);drumSpot=v(R*.3,0,R*.5);
-   backdrop.position.z=-R-1.6+5.3;
+   backdrop.position.z=-outer-1.6+5.3;
    warm[0].position.set(-R*.95,3.4,-R*.35);warm[1].position.set(R*.95,3.4,-R*.35);warm[2].position.set(0,3.2,R*.45);
    camPos=v(0,3.9+R*1.05,R+2.9);camLook=v(0,.3,-R*.4);
   }else{
@@ -404,8 +458,8 @@ export function createHalayStage(canvas,{transparent=false}={}){
    const sideStep=Math.sin(beat)*.065*scale;
    for(let i=0;i<n;i++){
     const a=actors.get(dancers[i].id),location=along(n===1?arcLength*.5:i/(n-1)*arcLength),q=location.q;
-    a.root.position.set(location.p.x+sideStep,0,location.p.z+Math.cos(beat)*.025*scale);a.root.scale.setScalar(scale);a.root.rotation.y=layout==='line'?0:-Math.atan(q*(layout==='wide'?.7:1.4))*.55;
-    if(mode==='orbit'){a.root.position.z+=Math.sin(time*.35)*.15}
+    const target=v(location.p.x+sideStep,0,location.p.z+Math.cos(beat)*.025*scale+(mode==='orbit'?Math.sin(time*.35)*.15:0));a.root.scale.setScalar(scale);
+    place(a,dancers[i].id,target,layout==='line'?0:-Math.atan(q*(layout==='wide'?.7:1.4))*.55,clock,dt);
     updateLegs(a,time,bpm,scale);rows.push(a);
    }
    bench.position.set(0,0,2.1);bench.rotation.y=0;zurnaSpot=v(-1.7,0,2.9);drumSpot=v(1.4,0,3.55);backdrop.position.z=0;
@@ -413,37 +467,50 @@ export function createHalayStage(canvas,{transparent=false}={}){
   }
   squareRugs.visible=!circle;roundRugs.zurna.visible=roundRugs.drum.visible=circle;
   roundRugs.zurna.position.copy(zurnaSpot);roundRugs.drum.position.copy(drumSpot);
-  camera.position.copy(camPos);if(circle)camera.position.x+=Math.sin(time*.11)*.35;camera.lookAt(camLook);
+  {const k=dt?1-Math.exp(-dt*6):1;for(const key of ['yaw','pitch','zoom'])view[key]+=(want[key]-view[key])*k;
+   const intro=Math.max(0,1-(clock-createdAt)/3.2),push=intro*intro*(3-2*intro);
+   const sph=new T.Spherical().setFromVector3(camPos.clone().sub(camLook));
+   sph.theta+=view.yaw;sph.phi=clampView(sph.phi-view.pitch-push*.12,.2,1.5);sph.radius*=view.zoom*(1+push*.85);
+   camPos=camLook.clone().add(new T.Vector3().setFromSpherical(sph));}
+  camera.position.copy(camPos);if(circle)camera.position.x+=Math.sin(time*.11)*.25;camera.lookAt(camLook);
   key.target.position.copy(camLook);key.position.set(camLook.x-3,8+radius,camLook.z+5);
-  const joinHeight=circle?1.6:1.17,joins=[];
+  const joinHeight=circle?1.74:1.17,joins=[];
   const links=closed?rows.length:Math.max(0,rows.length-1);
   for(let i=0;i<links;i++){
-   const left=rows[i],right=rows[(i+1)%rows.length],s=left.root.scale.x,p=left.root.localToWorld(v(.205,joinHeight,circle?.09:0)),q=right.root.localToWorld(v(-.205,joinHeight,circle?.09:0)),t=p.add(q).multiplyScalar(.5);
-   t.y+=Math.sin(beat)*.065*s;joins.push(t);
+   const left=rows[i],right=rows[(i+1)%rows.length],s=left.root.scale.x;
+   if(left.pose?.free||right.pose?.free||(circle&&left.ring!==right.ring)){joins.push(null);continue}
+   const p=left.root.localToWorld(v(.205,joinHeight,circle?.09:0)),q=right.root.localToWorld(v(-.205,joinHeight,circle?.09:0)),t=p.add(q).multiplyScalar(.5);
+   t.y+=(circle?-H.dip*.09+H.kick*.04+(H.liftR+H.liftL)*.02:Math.sin(beat)*.065)*s;joins.push(t);
   }
   for(let i=0;i<rows.length;i++){
    const a=rows[i];
-   for(const arm of a.arms){const neighbor=arm.side===-1?(closed?joins[(i-1+rows.length)%rows.length]:joins[i-1]):joins[i];const target=neighbor||a.root.localToWorld(v(arm.side*.43,(circle?1.45:1.18)+Math.sin(beat)*.08,.06));solveArm(a,arm,target,time,bpm)}
+   for(const arm of a.arms){
+    const neighbor=arm.side===-1?(closed?joins[(i-1+rows.length)%rows.length]:joins[i-1]):joins[i];
+    let free;
+    if(a.pose?.free)free=v(arm.side*.24,.82+Math.sin((a.pose.stride||0)+(arm.side>0?Math.PI:0))*.08*(a.pose.walk||0),.06+(a.pose.sit||0)*.25);
+    else if((i===0||(circle&&rows[i-1]?.ring!==a.ring))&&arm.side===-1&&!a.ring)free=v(-.38,1.82+Math.sin(beat)*.1,.16+Math.cos(beat)*.05);
+    else free=v(arm.side*.43,(circle?1.68:1.18)+Math.sin(beat)*.08,.06);
+    solveArm(a,arm,neighbor||a.root.localToWorld(free),time,bpm)}
   }
   for(let i=0;i<rows.length;i++){
-   const a=rows[i];a.flag.visible=i===0&&!closed;
+   const a=rows[i];a.flag.visible=i===0&&!closed&&!a.pose?.free;
    if(a.flag.visible){a.flag.position.copy(a.arms[0].hand.position).add(v(-.065,-.13,0));a.flag.rotation.z=.2+Math.sin(beat)*.3;const positions=a.flag.geometry.attributes.position;for(let j=0;j<positions.count;j++)positions.setZ(j,Math.sin(positions.getY(j)*19+time*9)*.023);positions.needsUpdate=true}
   }
   let maxGap=0;
   for(let i=0;i<links;i++){
-   const next=rows[(i+1)%rows.length],p=rows[i].body.localToWorld(rows[i].arms[1].hand.position.clone()),q=next.body.localToWorld(next.arms[0].hand.position.clone());maxGap=Math.max(maxGap,p.distanceTo(q));
+   const next=rows[(i+1)%rows.length];if(!joins[i])continue;const p=rows[i].body.localToWorld(rows[i].arms[1].hand.position.clone()),q=next.body.localToWorld(next.arms[0].hand.position.clone());maxGap=Math.max(maxGap,p.distanceTo(q));
   }
   const lift=circle?.1:.015,faceCamera=spot=>Math.atan2(camPos.x-spot.x,camPos.z-spot.z);
   const drummer=users.find(u=>u.role==='drummer');
-  if(drummer){const a=actors.get(drummer.id);a.root.position.copy(drumSpot).setY(lift);a.root.scale.setScalar(1);a.root.rotation.y=circle?faceCamera(drumSpot)-.35:-.22;updateLegs(a,time,bpm,1);for(const arm of a.arms){solveArm(a,arm,a.root.localToWorld(v(arm.side*.18,1.0+Math.sin(beat+arm.side)*.08,.38)),time,bpm)}}
+  if(drummer){const a=actors.get(drummer.id);a.root.position.copy(drumSpot).setY(lift);a.root.scale.setScalar(1);a.root.rotation.y=circle?faceCamera(drumSpot)-.35:-.22;updateLegs(a,time,bpm,1);const ph=((time*bpm/60)%1+1)%1;for(const arm of a.arms){const up=arm.side===-1?(1-Math.cos(ph*2*Math.PI))/2:(1-Math.cos(((ph+.5)%1)*2*Math.PI))/2*.35;solveArm(a,arm,a.root.localToWorld(v(arm.side*.2,1.05+up*(arm.side===-1?.78:.25),.34-up*.12)),time,bpm)}}
   const zurnaci=users.find(u=>u.role==='zurnaci');
-  if(zurnaci){const a=actors.get(zurnaci.id);a.root.position.copy(zurnaSpot).setY(lift);a.root.scale.setScalar(1);a.root.rotation.y=circle?faceCamera(zurnaSpot)+.45:.3;updateLegs(a,time,bpm,1);a.body.rotation.x=-.04+Math.sin(beat*.5)*.03;a.root.updateMatrixWorld(true);const z=a.zurna;for(const arm of a.arms){const local=z.mouth.clone().lerp(z.bell,arm.side===-1?.62:.34);local.x+=arm.side*.03;solveArm(a,arm,a.body.localToWorld(local),time,bpm)}}
+  if(zurnaci){const a=actors.get(zurnaci.id);a.root.position.copy(zurnaSpot).setY(lift);a.root.scale.setScalar(1);a.root.rotation.y=circle?faceCamera(zurnaSpot)+.45:.3;updateLegs(a,time,bpm,1);a.body.rotation.x=-.04+Math.sin(beat*.5)*.03;a.body.rotation.z=Math.sin(beat*.5)*.05;a.root.updateMatrixWorld(true);const z=a.zurna;for(const arm of a.arms){const local=z.mouth.clone().lerp(z.bell,arm.side===-1?.62:.34);local.x+=arm.side*.03;solveArm(a,arm,a.body.localToWorld(local),time,bpm)}}
   const w=canvas.clientWidth,h=canvas.clientHeight,size=w+'x'+h;if(size!==lastSize){renderer.setSize(w,h,false);camera.aspect=w/h;lastSize=size}
   camera.updateProjectionMatrix();camera.updateMatrixWorld();
   renderer.render(scene,camera);
-  const labels=users.map(u=>{const a=actors.get(u.id),head=a.root.localToWorld(v(0,2.12,0)),p=head.clone().project(camera),near=circle?Math.max(.62,Math.min(1.3,7.5/head.distanceTo(camera.position))):a.root.scale.x;return {user:u,x:(p.x*.5+.5)*540,y:(-.5*p.y+.5)*960,scale:near,depth:p.z}}).sort((a,b)=>b.depth-a.depth);
+  const labels=users.map(u=>{const a=actors.get(u.id),head=a.root.localToWorld(v(0,2.12+Math.min(0,a.body.position.y),0)),p=head.clone().project(camera),near=circle?Math.max(.62,Math.min(1.3,7.5/head.distanceTo(camera.position))):a.root.scale.x;return {user:u,x:(p.x*.5+.5)*540,y:(-.5*p.y+.5)*960,scale:near,depth:p.z}}).sort((a,b)=>b.depth-a.depth);
   labels.spots={drum:project(drumSpot.clone().setY(drummer?2.75:1.2)),zurna:project(zurnaSpot.clone().setY(zurnaci?2.75:1.2)),drumTaken:Boolean(drummer),zurnaTaken:Boolean(zurnaci)};
-  diagnostics={renderer:'threejs-webgl',chainCount:n,links,closed,radius,maxHandGap:maxGap,maxFacingAngle:circle?0:Math.max(0,...rows.map(a=>Math.abs(a.root.rotation.y))),phase:time,layout,theme:options.theme||'night',quality:options.quality||'balanced',transparent,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles};
+  diagnostics={renderer:'threejs-webgl',entering:entries.size,chainCount:n,links,closed,radius,maxHandGap:maxGap,maxFacingAngle:circle?0:Math.max(0,...rows.map(a=>Math.abs(a.root.rotation.y))),phase:time,layout,theme:options.theme||'night',quality:options.quality||'balanced',transparent,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles};
   return labels;
  }
  return {render,diagnostics:()=>diagnostics,dispose:()=>renderer.dispose()};

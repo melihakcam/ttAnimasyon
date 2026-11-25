@@ -1,5 +1,5 @@
 {
-  "max_users": 60,
+  "max_users": 150,
   "base_bpm": 112,
   "like_threshold": 300,
   "gift_rules": {

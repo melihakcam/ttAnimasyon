@@ -94,7 +94,7 @@ def snapshot():
 class SessionSettings(BaseModel):
     mode: Literal['demo','live']='demo'
     scene: Literal['halay','orbit']='halay'
-    capacity: int=Field(default=48,ge=4,le=60)
+    capacity: int=Field(default=80,ge=4,le=120)
     username: str=Field(default='',max_length=32)
     layout: Literal['circle','arc','wide','line']='circle'
     theme: Literal['night','sunset']='night'
@@ -298,18 +298,19 @@ async def automatic_demo():
     index=0
     while True:
         async with lock:
-            uid='auto'+str(index%60)
+            uid='auto'+str(index%150)
             name=names[index%len(names)]+(' '+str(index//len(names)+1) if index>=len(names) else '')
             payload=dict(type='comment',user_id=uid,name=name,text=comments[(index*5)%len(comments)],count=1)
             if uid not in engine.users and len(engine.users)>=engine.config['max_users']:
                 uid=next(iter(engine.users));payload['user_id']=uid;payload['name']=engine.users[uid]['name']
             engine.apply(payload)
             if index%3==2:
-                gift='Drum' if index%12==11 else 'Zurna' if index%12==5 else 'Heart Me' if index%15==14 else 'Rose'
+                gift='Drum' if index%12==11 else 'Zurna' if index%12==5 else 'Heart Me' if index%7==6 else 'Rose'
                 engine.apply(dict(type='gift',user_id=uid,name=payload['name'],gift=gift,count=1+index%3))
             await broadcast()
         index+=1
-        await asyncio.sleep(.9 if index<40 else 1.8)
+        # Açılışta kalabalık hızla dolar (videodaki gibi), sonra yeni gelenler tek tek katılır.
+        await asyncio.sleep(.3 if index<70 else 1.6)
 
 @app.post('/api/session/start')
 async def start_session(settings:SessionSettings):

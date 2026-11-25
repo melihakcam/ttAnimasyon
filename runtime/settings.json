@@ -1,7 +1,7 @@
 {
   "mode": "demo",
   "scene": "halay",
-  "capacity": 48,
+  "capacity": 80,
   "username": "",
   "layout": "circle",
   "theme": "night",
